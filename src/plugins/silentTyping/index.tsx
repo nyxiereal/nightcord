@@ -300,7 +300,6 @@ export default definePlugin({
     dependencies: ["CommandsAPI", "ChatInputButtonAPI"],
     tags: ["Chat", "Privacy"],
     isModified: true,
-    enabledByDefault: false,
     settings,
 
     shouldHideChatBarTypingIndicators,

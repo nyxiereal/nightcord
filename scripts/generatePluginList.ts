@@ -31,11 +31,11 @@ import { getEntryPoint, isPluginFile, parseDevs, parseEquicordDevs, parseFile, P
     let dirs: string[];
 
     if (equicordFlag) {
-        dirs = ["src/equicordplugins"];
+        dirs = ["src/nightcordplugins"];
     } else if (vencordFlag) {
         dirs = ["src/plugins", "src/plugins/_core"];
     } else {
-        dirs = ["src/plugins", "src/plugins/_core", "src/equicordplugins"];
+        dirs = ["src/plugins", "src/plugins/_core", "src/nightcordplugins"];
     }
 
     const outputPath = args.find(a => !a.startsWith("--")) ?? null;

@@ -219,3 +219,27 @@ export const MessageTypeSets: t.MessageTypeSets = findByPropsLazy("REPLYABLE", "
 
 export const CloudUploader = findLazy(m => m.prototype?.trackUploadFinished);
 export const ChannelActions = findByPropsLazy("selectChannel", "preload");
+
+// ─── Re-exports for compatibility with Equicord/Vencord plugins ────────────────
+
+// Modal API (from @utils/modal)
+export { openModal, openModalLazy, closeModal, closeAllModals, ModalRoot as Modal, ModalRoot, ModalHeader, ModalContent, ModalFooter, ModalCloseButton } from "@utils/modal";
+
+// Actions
+export const VoiceActions = findByPropsLazy("toggleSelfMute", "setChannel");
+export const GuildActions = findByPropsLazy("requestMembersById", "leaveGuild");
+export const PinActions = findByPropsLazy("pinMessage", "unpinMessage");
+
+// Utils
+export const ReadStateUtils = findByPropsLazy("ackMessage", "hasUnread");
+export const ColorUtils = findByPropsLazy("hex2int", "int2hex");
+export const ApplicationStreamingStore = findByPropsLazy("getAnyStreamForUser", "getStreamForUser");
+export const ApplicationStreamPreviewStore = findByPropsLazy("getPreviewURL");
+export const fetchApplicationsRPC = findByCodeLazy("APPLICATION_RPC(");
+
+// React DnD hooks
+export const useDrag = findByCodeLazy("useDrag", "DragSourceMonitor");
+export const useDrop = findByCodeLazy("useDrop", "DropTargetMonitor");
+
+// ConfirmModal component
+export const ConfirmModal = findByCodeLazy('"confirmButtonText"', '"cancelButtonText"');

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Vencord, a Discord client mod
  * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -6,7 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { BackupRestoreIcon, LogIcon, MainSettingsIcon, PaintbrushIcon, PatchHelperIcon, PluginsIcon, UpdaterIcon, MagnifyingGlassIcon } from "@components/Icons";
-import IconsTab from "@equicordplugins/iconViewer/components/IconsTab";
+import IconsTab from "@nightcordplugins/iconViewer/components/IconsTab";
 
 import {
     BackupAndRestoreTab,
@@ -18,8 +18,8 @@ import {
     UpdaterTab,
     VencordTab,
 } from "@components/settings";
-import { CreateThemeTab } from "@equicordplugins/createTheme/components/CreateThemeTab";
-import { PencilSparkleIcon } from "@equicordplugins/createTheme/components/PencilSparkleIcon";
+import { CreateThemeTab } from "@nightcordplugins/createTheme/components/CreateThemeTab";
+import { PencilSparkleIcon } from "@nightcordplugins/createTheme/components/PencilSparkleIcon";
 import { gitHashShort } from "@shared/vencordUserAgent";
 import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";

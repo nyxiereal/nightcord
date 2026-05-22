@@ -59,7 +59,12 @@ export const TooltipContainer = TooltipContainerComponent as never;
 // FIXME: t.TextInput was for the old void components, and is not 100% correct for the mana component
 export const TextInput = waitForComponent<t.TextInput>("TextInput", filters.componentByCode('setHasValue?.(""!==', '="text",'));
 export const TextArea = waitForComponent<t.TextArea>("TextArea", filters.componentByCode("!0,rows:", "showRemainingCharacterCount:"));
-export const Select = waitForComponent<t.Select>("Select", filters.componentByCode('selectionMode:"single",onSelectionChange:', "isSelected:"));
+export const Select = waitForComponent<t.Select>("Select",
+    m => filters.componentByCode("renderLeading:", "isSelected:", "renderOptionLabel:")(m)
+    || filters.componentByCode('selectionMode:"single",onSelectionChange:', "isSelected:")(m)
+    || filters.componentByCode("isSelected:", "serialize:", "closeOnSelect:")(m)
+    || filters.componentByCode("onSelectionChange:", "isSelected:", "serialize:")(m)
+);
 export const SearchableSelect = waitForComponent<t.SearchableSelect>("SearchableSelect", filters.componentByCode('?"multiple":"single",required:'));
 export const Slider = waitForComponent<t.Slider>("Slider", filters.componentByCode("markDash", "this.renderMark("));
 export const Popout = waitForComponent<t.Popout>("Popout", filters.componentByCode("ref:this.ref,", "renderPopout:this.renderPopout,"));

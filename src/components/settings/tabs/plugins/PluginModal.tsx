@@ -31,7 +31,7 @@ import { debounce } from "@shared/debounce";
 import { classNameFactory } from "@utils/css";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
-import { classes } from "@utils/misc";
+import { classes, isObjectEmpty } from "@utils/misc";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { OptionType, Plugin } from "@utils/types";
 
@@ -85,24 +85,25 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         if (!hasSettings || !settings)
             return <Paragraph>Aucun paramètre disponible pour ce plugin.</Paragraph>;
 
-        const options = Object.entries(settings.def).map(([key, setting]) => {
-            if (setting.type === OptionType.CUSTOM || setting.hidden) return null;
+        const options = Object.entries(settings.def).map(([key, option]) => {
+            if (option.type === OptionType.CUSTOM || option.hidden) return null;
 
             function onChange(newValue: any) {
-                const option = plugin.settings!.def[key];
-                if (!option || option.type === OptionType.CUSTOM) return;
+                const opt = plugin.settings!.def[key];
+                if (!opt || opt.type === OptionType.CUSTOM) return;
 
                 pluginSettings[key] = newValue;
 
-                if (option.restartNeeded) onRestartNeeded(key);
+                if (opt.restartNeeded) onRestartNeeded(key);
             }
 
-            const Component = OptionComponentMap[setting.type];
+            const Component = OptionComponentMap[option.type];
+            if (!Component) return null;
             return (
                 <ErrorBoundary noop key={key}>
                     <Component
                         id={key}
-                        setting={setting}
+                        option={option}
                         onChange={debounce(onChange)}
                         pluginSettings={pluginSettings}
                         definedSettings={settings}

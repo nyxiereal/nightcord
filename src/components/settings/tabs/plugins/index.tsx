@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Vencord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
@@ -37,7 +37,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { useAwaiter, useIntersection } from "@utils/react";
-import { Alerts, lodash, Parser, React, Select, TextInput, Toasts, Tooltip, useCallback, useMemo, useState } from "@webpack/common";
+import { Alerts, lodash, Parser, React, Select as DiscordSelect, TextInput, Toasts, Tooltip, useCallback, useMemo, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
@@ -135,6 +135,33 @@ import { SearchStatus, TUTORIAL_CACHE } from "./components/Common";
 
 // @ts-ignore
 window.TUTORIAL_CACHE = TUTORIAL_CACHE;
+
+// Fallback select natif si le composant Discord n'est pas trouvé
+function NativeSelect({ options, select, isSelected }: any) {
+    const currentVal = options.find((o: any) => isSelected(o.value))?.value ?? options.find((o: any) => o.default)?.value ?? options[0]?.value;
+    return (
+        <select
+            style={{
+                background: "var(--background-secondary)",
+                color: "var(--text-normal)",
+                border: "1px solid var(--background-modifier-accent)",
+                borderRadius: 4,
+                padding: "6px 10px",
+                fontSize: 14,
+                cursor: "pointer",
+                outline: "none",
+            }}
+            value={currentVal}
+            onChange={e => select(Number(e.target.value))}
+        >
+            {options.map((o: any) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+        </select>
+    );
+}
+
+const Select = DiscordSelect || NativeSelect;
 interface PluginSettingsProps {
     premiumOnly?: boolean;
 }
@@ -193,7 +220,7 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
 
     const hasUserPlugins = useMemo(() => !IS_STANDALONE && Object.values(PluginMeta).some(m => m.userPlugin), []);
 
-    const [searchValue, setSearchValue] = useState({ value: "", status: SearchStatus.ALL });
+    const [searchValue, setSearchValue] = useState({ value: "", status: SearchStatus.NIGHTCORD });
     const [searchInput, setSearchInput] = useState("");
 
     const debouncedSetSearch = useMemo(
@@ -236,8 +263,12 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
             case SearchStatus.ENABLED:
                 if (!enabled) return false;
                 break;
-            case SearchStatus.EQUICORD:
-                if (!PluginMeta[plugin.name].folderName.startsWith("src/equicordplugins/")) return false;
+            case SearchStatus.NIGHTCORD:
+                if (!PluginMeta[plugin.name].folderName.startsWith("src/nightcordplugins/")) return false;
+                break;
+            case SearchStatus.OTHERS:
+                if (PluginMeta[plugin.name].folderName.startsWith("src/nightcordplugins/") || PluginMeta[plugin.name].folderName.startsWith("src/plugins/_")) return false;
+                if (!PluginMeta[plugin.name].folderName.startsWith("src/plugins/")) return false;
                 break;
             case SearchStatus.VENCORD:
                 if (!PluginMeta[plugin.name].folderName.startsWith("src/plugins/")) return false;
@@ -284,8 +315,9 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
 
     const handleRestartNeeded = useCallback((name: string, key: string) => changes.handleChange(`${name}:${key}`), [changes]);
 
-    const { plugins, requiredPlugins } = useMemo(() => {
-        const plugins = [] as JSX.Element[];
+    const { nightcordPlugins, othersPlugins, requiredPlugins } = useMemo(() => {
+        const nightcordPlugins = [] as JSX.Element[];
+        const othersPlugins = [] as JSX.Element[];
         const requiredPlugins = [] as JSX.Element[];
 
         const showApi = searchValue.status === SearchStatus.API_PLUGINS;
@@ -316,7 +348,9 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
                     </Tooltip>
                 );
             } else {
-                plugins.push(
+                const folderName = PluginMeta[p.name]?.folderName ?? "";
+                const isNightcord = folderName.startsWith("src/nightcordplugins/");
+                const card = (
                     <PluginCard
                         onRestartNeeded={handleRestartNeeded}
                         disabled={false}
@@ -325,9 +359,14 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
                         key={p.name}
                     />
                 );
+                if (isNightcord) {
+                    nightcordPlugins.push(card);
+                } else {
+                    othersPlugins.push(card);
+                }
             }
         }
-        return { plugins, requiredPlugins };
+        return { nightcordPlugins, othersPlugins, requiredPlugins };
     }, [sortedPlugins, searchValue, newPluginsSet, depMap, settings.plugins, pluginFilter, handleRestartNeeded]);
 
     function resetCheckAndDo() {
@@ -383,22 +422,25 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
         const enabledUserPlugins = enabledPlugins.filter(p => PluginMeta[p].userPlugin).length;
         return { totalStockPlugins, totalUserPlugins, enabledStockPlugins, enabledUserPlugins, enabledPlugins };
     }, [settings.plugins]);
-    const pluginsToLoad = Math.min(36, plugins.length);
+    const allPlugins = [...nightcordPlugins, ...othersPlugins];
+    const pluginsToLoad = Math.min(36, allPlugins.length);
     const [visibleCount, setVisibleCount] = React.useState(pluginsToLoad);
     const loadMore = React.useCallback(() => {
-        setVisibleCount(v => Math.min(v + pluginsToLoad, plugins.length));
-    }, [plugins.length]);
+        setVisibleCount(v => Math.min(v + pluginsToLoad, allPlugins.length));
+    }, [allPlugins.length]);
 
     const dLoadMore = useMemo(() => debounce(loadMore, 100), [loadMore]);
 
     const [sentinelRef, isSentinelVisible] = useIntersection();
     React.useEffect(() => {
-        if (isSentinelVisible && visibleCount < plugins.length) {
+        if (isSentinelVisible && visibleCount < allPlugins.length) {
             dLoadMore();
         }
-    }, [isSentinelVisible, visibleCount, plugins.length, dLoadMore]);
+    }, [isSentinelVisible, visibleCount, allPlugins.length, dLoadMore]);
 
-    const visiblePlugins = plugins.slice(0, visibleCount);
+    // Split visible count between the two sections proportionally
+    const nightcordVisible = nightcordPlugins.slice(0, Math.min(visibleCount, nightcordPlugins.length));
+    const othersVisible = othersPlugins.slice(0, Math.max(0, visibleCount - nightcordPlugins.length));
 
     return (
         <SettingsTab>
@@ -434,14 +476,13 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
                                 { label: "Show All", value: SearchStatus.ALL, default: true },
                                 { label: "Show Enabled", value: SearchStatus.ENABLED },
                                 { label: "Show Disabled", value: SearchStatus.DISABLED },
-
+                                { label: "Show Nightcord Plugins", value: SearchStatus.NIGHTCORD },
+                                { label: "Show Others Plugins", value: SearchStatus.OTHERS },
                                 { label: "Show New", value: SearchStatus.NEW },
                                 hasUserPlugins && { label: "Show UserPlugins", value: SearchStatus.USER_PLUGINS },
-                                { label: "Show API Plugins", value: SearchStatus.API_PLUGINS },
-                                { label: "Show Tutorial", value: SearchStatus.TUTORIAL },
                             ].filter(isTruthy)}
                             serialize={String}
-                            select={onStatusChange}
+                            select={status => onStatusChange(status)}
                             isSelected={v => v === searchValue.status}
                             closeOnSelect={true}
                         />
@@ -449,24 +490,51 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
                 </div>
             </div>
 
-            <HeadingTertiary className={Margins.top20}>{premiumOnly ? "Premium Plugins" : "Plugins"}</HeadingTertiary>
+            {premiumOnly ? (
+                <>
+                    <HeadingTertiary className={Margins.top20}>Premium Plugins</HeadingTertiary>
+                    {nightcordPlugins.length || othersPlugins.length
+                        ? (
+                            <div className={cl("grid")}>
+                                {[...nightcordVisible, ...othersVisible].length
+                                    ? [...nightcordVisible, ...othersVisible]
+                                    : <Paragraph>No plugins meet the search criteria.</Paragraph>
+                                }
+                            </div>
+                        )
+                        : <ExcludedPluginsList search={search} />
+                    }
+                </>
+            ) : (
+                <>
+                    {nightcordPlugins.length > 0 && (
+                        <>
+                            <HeadingTertiary className={Margins.top20}>Nightcord Plugins</HeadingTertiary>
+                            <div className={cl("grid")}>
+                                {nightcordVisible}
+                            </div>
+                        </>
+                    )}
 
-            {plugins.length || requiredPlugins.length
-                ? (
-                    <>
-                        <div className={cl("grid")}>
-                            {visiblePlugins.length
-                                ? visiblePlugins
-                                : <Paragraph>No plugins meet the search criteria.</Paragraph>
-                            }
-                        </div>
-                        {visibleCount < plugins.length && (
-                            <div ref={sentinelRef} style={{ height: 32 }} />
-                        )}
-                    </>
-                )
-                : <ExcludedPluginsList search={search} />
-            }
+                    {othersPlugins.length > 0 && (
+                        <>
+                            <Divider className={Margins.top20} />
+                            <HeadingTertiary className={classes(Margins.top20, Margins.bottom8)}>Others Plugins</HeadingTertiary>
+                            <div className={cl("grid")}>
+                                {othersVisible}
+                            </div>
+                        </>
+                    )}
+
+                    {nightcordPlugins.length === 0 && othersPlugins.length === 0 && (
+                        <ExcludedPluginsList search={search} />
+                    )}
+
+                    {visibleCount < allPlugins.length && (
+                        <div ref={sentinelRef} style={{ height: 32 }} />
+                    )}
+                </>
+            )}
 
             {!premiumOnly && (
                 <>

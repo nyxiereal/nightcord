@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Vencord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
@@ -42,7 +42,7 @@ registerCspIpcHandlers();
 
 // ── Early start of ghost-server on Nightcord launch ──────────────
 // The server runs in the background from startup to avoid delay on first click
-import * as ghostNative from "../plugins/ghostClient/native";
+import * as ghostNative from "../nightcordplugins/ghostClient/native";
 (async () => {
     try {
         await (ghostNative as any).init(null);

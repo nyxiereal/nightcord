@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Vencord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
@@ -63,6 +63,20 @@ export function isPluginEnabled(p: string) {
         plugin.isDependency ||
         (Settings as any)?.plugins?.[p]?.enabled
     ) ?? false;
+}
+
+export function isSettingDisabled(definedSettings: any, setting: any): boolean {
+    if (typeof setting.disabled === "function") {
+        return setting.disabled.call(definedSettings);
+    }
+    return setting.disabled ?? false;
+}
+
+export function hasAnyVisibleSettings(plugin: Plugin): boolean {
+    if (!plugin.settings) return false;
+    return Object.values(plugin.settings.def).some(
+        s => s.type !== undefined && !s.hidden
+    );
 }
 
 export function isPluginRequired(p: string) {
@@ -365,6 +379,20 @@ export const initPluginManager = onlyOnce(function init() {
     ];
 
     const neededApiPlugins = new Set<string>();
+
+    // Migration: force tous les plugins a OFF sauf required/enabledByDefault
+    const MIGRATION_FLAG = "__nightcord_default_off_v1__";
+    if (!(SettingsStore.plain as any)[MIGRATION_FLAG]) {
+        for (const p of pluginsValues) {
+            const shouldBeOn = p.required || p.enabledByDefault;
+            if (!shouldBeOn) {
+                const s = SettingsStore.plain.plugins[p.name];
+                if (s) s.enabled = false;
+            }
+        }
+        (SettingsStore.plain as any)[MIGRATION_FLAG] = true;
+        SettingsStore.markAsChanged();
+    }
 
     // First round-trip to mark and force enable dependencies
     //

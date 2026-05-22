@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Vencord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
@@ -45,7 +45,7 @@
     display: grid;
     height: 40px;
     gap: 10px;
-    grid-template-columns: 1fr 150px;
+    grid-template-columns: 1fr 1fr;
 }
 
 .vc-plugins-dep-name {

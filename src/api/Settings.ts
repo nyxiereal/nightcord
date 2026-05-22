@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Vencord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
@@ -164,6 +164,31 @@ const DefaultSettings: Settings = {
 const settings = !IS_REPORTER ? VencordNative.settings.get() : {} as Settings;
 mergeDefaults(settings, DefaultSettings);
 
+// Force enabledByDefault plugins to be enabled, even if they were previously saved as disabled.
+// This runs at load time so it works even for plugins already present in the settings file.
+if (!IS_REPORTER && settings.plugins && plugins) {
+    for (const [pluginKey, pluginDef] of Object.entries(plugins as Record<string, any>)) {
+        const forceOff =
+            FORCE_DISABLED_DEFAULT_PLUGIN_KEYS.has(pluginKey.toLowerCase())
+            || FORCE_DISABLED_DEFAULT_PLUGIN_KEYS.has(String(pluginDef?.name ?? "").toLowerCase());
+
+        if (forceOff) {
+            if (settings.plugins[pluginKey]) settings.plugins[pluginKey].enabled = false;
+            continue;
+        }
+
+        const shouldBeEnabled = Boolean(pluginDef?.required) || Boolean(pluginDef?.enabledByDefault);
+        if (shouldBeEnabled) {
+            if (!settings.plugins[pluginKey]) {
+                settings.plugins[pluginKey] = { enabled: true };
+            } else {
+                settings.plugins[pluginKey].enabled = true;
+            }
+        }
+    }
+}
+
+
 export const SettingsStore = new SettingsStoreClass(settings, {
     readOnly: true,
     getDefaultValue({
@@ -181,9 +206,22 @@ export const SettingsStore = new SettingsStoreClass(settings, {
                 FORCE_DISABLED_DEFAULT_PLUGIN_KEYS.has(pluginKey.toLowerCase())
                 || FORCE_DISABLED_DEFAULT_PLUGIN_KEYS.has(String(pluginDef?.name ?? "").toLowerCase());
 
-            return target[key] = {
-                enabled: IS_REPORTER || Boolean(pluginDef?.required) || !forceOff
-            };
+            const shouldBeEnabled = !forceOff && (IS_REPORTER || Boolean(pluginDef?.required) || Boolean(pluginDef?.enabledByDefault));
+
+            if (!target[key]) {
+                return target[key] = { enabled: shouldBeEnabled };
+            }
+
+            // Si le plugin doit être actif par défaut et qu'il est désactivé, on le force à actif
+            if (shouldBeEnabled && target[key].enabled === false) {
+                target[key].enabled = true;
+            }
+            // Si le plugin doit être désactivé de force, on le force à inactif
+            if (forceOff) {
+                target[key].enabled = false;
+            }
+
+            return target[key];
         }
 
         // Since the property is not set, check if this is a plugin's setting and if so, try to resolve

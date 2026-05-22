@@ -57,8 +57,8 @@
             "@webpack/wreq.d": [
                 "./webpack/wreq.d"
             ],
-            "@equicordplugins/*": [
-                "./equicordplugins/*"
+            "@nightcordplugins/*": [
+                "./nightcordplugins/*"
             ],
             "main/*": [
                 "./nightcord/main/*"

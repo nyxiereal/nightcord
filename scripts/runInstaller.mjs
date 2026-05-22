@@ -58,28 +58,20 @@ async function ensureBinary() {
         ? join(FILE_DIR, INSTALLER_APP_DARWIN)
         : null;
 
-    // Vérifier si une mise à jour est disponible via ETag
-    const etag = existsSync(outputFile) && existsSync(ETAG_FILE)
-        ? readFileSync(ETAG_FILE, "utf-8")
-        : null;
-
-    if (etag) {
-        console.log("[Nightcord] Vérification des mises à jour de l'installeur...");
-    } else {
-        console.log("[Nightcord] Téléchargement de l'installeur (" + filename + ")...");
+    // Si le binaire existe déjà, on l'utilise directement sans vérifier les mises à jour
+    if (existsSync(outputFile)) {
+        console.log("[Nightcord] Installeur déjà présent, utilisation locale.");
+        return outputFile;
     }
+
+    console.log("[Nightcord] Téléchargement de l'installeur (" + filename + ")...");
 
     const res = await fetch(BASE_URL + filename, {
         headers: {
-            "User-Agent": "Nightcord (https://github.com/nightcordoff/nightcord)",
-            "If-None-Match": etag ?? ""
+            "User-Agent": "Nightcord (https://github.com/nightcordoff/nightcord)"
         }
     });
 
-    if (res.status === 304) {
-        console.log("[Nightcord] Installeur à jour, pas de retéléchargement.");
-        return outputFile;
-    }
     if (!res.ok)
         throw new Error(`Échec du téléchargement de l'installeur : ${res.status} ${res.statusText}`);
 

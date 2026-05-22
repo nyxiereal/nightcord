@@ -800,3 +800,70 @@ export const ComponentsIcon = (props?: any) => {
         </Icon>
     );
 };
+
+
+// ─── Compatibility icons for Equicord/Vencord plugins ─────────────────────────
+
+export function HeadphonesIcon(props: IconProps) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={props.width ?? 24} height={props.height ?? 24} fill="currentColor" className={props.className}>
+            <path d="M12 2a9 9 0 0 0-9 9v7a3 3 0 0 0 3 3h1a1 1 0 0 0 1-1v-5a1 1 0 0 0-1-1H4v-3a8 8 0 0 1 16 0v3h-3a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h1a3 3 0 0 0 3-3v-7a9 9 0 0 0-9-9Z"/>
+        </svg>
+    );
+}
+
+export function GifIcon(props: IconProps) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={props.width ?? 24} height={props.height ?? 24} fill="currentColor" className={props.className}>
+            <path d="M2 5a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v14a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V5Zm8.5 4a2.5 2.5 0 0 0-2.5 2.5v1A2.5 2.5 0 0 0 10.5 15h1a1 1 0 0 0 1-1v-1.5a1 1 0 0 0-1-1H11a1 1 0 1 0 0 2v.5h-.5a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h2a1 1 0 0 0 0-2h-2Zm4.5 0a1 1 0 1 0 0 2h.5v1h-.5a1 1 0 1 0 0 2H16a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-1Zm-7 0a1 1 0 0 0-1 1v4a1 1 0 1 0 2 0v-4a1 1 0 0 0-1-1Z"/>
+        </svg>
+    );
+}
+
+export function StickerIcon(props: IconProps) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={props.width ?? 24} height={props.height ?? 24} fill="currentColor" className={props.className}>
+            <path d="M4.35 3A3.35 3.35 0 0 0 1 6.35v11.3A3.35 3.35 0 0 0 4.35 21h7.18c.89 0 1.74-.35 2.37-.98l4.12-4.12c.63-.63.98-1.48.98-2.37V6.35A3.35 3.35 0 0 0 16.65 3H4.35Z"/>
+        </svg>
+    );
+}
+
+export function VideoIcon(props: IconProps) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={props.width ?? 24} height={props.height ?? 24} fill="currentColor" className={props.className}>
+            <path d="M2 7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v1.38l2.37-1.9A1 1 0 0 1 22 7.26v9.48a1 1 0 0 1-1.63.78L18 15.62V17a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V7Z"/>
+        </svg>
+    );
+}
+
+export function AttachmentIcon(props: IconProps) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={props.width ?? 24} height={props.height ?? 24} fill="currentColor" className={props.className}>
+            <path d="M11.88 3.06a5.06 5.06 0 0 1 7.16 7.16l-9.19 9.19a3.04 3.04 0 1 1-4.3-4.3l8.14-8.14a1 1 0 1 1 1.42 1.42l-8.14 8.14a1.04 1.04 0 0 0 1.47 1.47l9.19-9.19a3.06 3.06 0 1 0-4.33-4.33L4.1 13.58a5.08 5.08 0 0 0 7.19 7.19l7.06-7.06a1 1 0 1 1 1.41 1.41l-7.06 7.07a7.08 7.08 0 1 1-10.01-10L11.88 3.06Z"/>
+        </svg>
+    );
+}
+
+export function RobotIcon(props: IconProps) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={props.width ?? 24} height={props.height ?? 24} fill="currentColor" className={props.className}>
+            <path d="M14 8a2 2 0 0 0-4 0H5a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-8a3 3 0 0 0-3-3h-5Zm-5 5a1 1 0 1 1 2 0 1 1 0 0 1-2 0Zm6 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0Zm-4 4h4a1 1 0 1 1 0 2h-4a1 1 0 1 1 0-2ZM12 2a1 1 0 0 1 1 1v1h1a1 1 0 1 1 0 2h-4a1 1 0 1 1 0-2h1V3a1 1 0 0 1 1-1Z"/>
+        </svg>
+    );
+}
+
+export function ChevronSmallDownIcon(props: IconProps) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={props.width ?? 24} height={props.height ?? 24} fill="currentColor" className={props.className}>
+            <path d="M5.3 9.3a1 1 0 0 1 1.4 0l5.3 5.29 5.3-5.3a1 1 0 1 1 1.4 1.42l-6 6a1 1 0 0 1-1.4 0l-6-6a1 1 0 0 1 0-1.41Z"/>
+        </svg>
+    );
+}
+
+export function ChevronSmallUpIcon(props: IconProps) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={props.width ?? 24} height={props.height ?? 24} fill="currentColor" className={props.className}>
+            <path d="M5.3 14.7a1 1 0 0 0 1.4 0L12 9.42l5.3 5.3a1 1 0 0 0 1.4-1.42l-6-6a1 1 0 0 0-1.4 0l-6 6a1 1 0 0 0 0 1.41Z"/>
+        </svg>
+    );
+}
