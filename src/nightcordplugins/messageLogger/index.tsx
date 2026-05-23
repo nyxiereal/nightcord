@@ -131,6 +131,11 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (
                         id,
                         mlDeleted: true,
                     });
+                    // Force immediate UI re-render — without this the message
+                    // stays visible until the user navigates away and back.
+                    // We schedule after the dispatch so the store has already
+                    // processed the removal before we trigger the update.
+                    Promise.resolve().then(() => updateMessage(channel_id, id));
                 } else {
                     updateMessage(channel_id, id, { editHistory: [] });
                 }
@@ -165,6 +170,12 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (
                         updateMessage(channel.id, msg.id, {
                             editHistory: [],
                         });
+                });
+                // Force immediate UI update for all removed messages
+                Promise.resolve().then(() => {
+                    messages.forEach(msg => {
+                        if (msg.deleted) updateMessage(channel.id, msg.id);
+                    });
                 });
             }}
         />,
