@@ -82,6 +82,8 @@ namespace NightcordInstaller
                     detectDiscord: async () => JSON.parse(await chrome.webview.hostObjects.backend.DetectDiscord()),
                     isInjected: async (path) => await chrome.webview.hostObjects.backend.IsInjected(path),
                     inject: async (path) => JSON.parse(await chrome.webview.hostObjects.backend.Inject(path)),
+                    startInject: (path) => JSON.parse(chrome.webview.hostObjects.sync.backend.StartInject(path)),
+                    getInjectStatus: () => JSON.parse(chrome.webview.hostObjects.sync.backend.GetInjectStatus()),
                     uninject: async (path) => JSON.parse(await chrome.webview.hostObjects.backend.Uninject(path)),
                     minimizeApp: () => chrome.webview.hostObjects.backend.MinimizeApp(),
                     closeApp: () => chrome.webview.hostObjects.backend.CloseApp(),
@@ -147,6 +149,7 @@ namespace NightcordInstaller
             _form = form;
             _webView = webView;
             _http = new HttpClient();
+            _http.Timeout = TimeSpan.FromSeconds(30); // Prevent infinite hang on GitHub API
             _exeDir = Path.GetDirectoryName(Application.ExecutablePath);
             _distDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Nightcord", "dist");
         }
@@ -174,12 +177,21 @@ namespace NightcordInstaller
             }));
         }
 
-        public void SetProgress(double percent, string text)
+        public void SetProgress(double percent, string text, double mbDownloaded = -1, double mbTotal = -1)
         {
             _form.Invoke(new Action(() => {
                 var safeText = text.Replace("\\", "\\\\").Replace("'", "\\'").Replace("\n", " ");
                 var percentStr = percent.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
-                _webView.CoreWebView2.ExecuteScriptAsync($"if(typeof setLoading === 'function') setLoading(true, '{safeText}', {percentStr});");
+                if (mbDownloaded >= 0 && mbTotal >= 0)
+                {
+                    var mbDlStr    = mbDownloaded.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+                    var mbTotalStr = mbTotal.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+                    _webView.CoreWebView2.ExecuteScriptAsync($"if(typeof setLoading === 'function') setLoading(true, '{safeText}', {percentStr}, {mbDlStr}, {mbTotalStr});");
+                }
+                else
+                {
+                    _webView.CoreWebView2.ExecuteScriptAsync($"if(typeof setLoading === 'function') setLoading(true, '{safeText}', {percentStr});");
+                }
             }));
         }
 
@@ -223,6 +235,46 @@ namespace NightcordInstaller
             });
         }
 
+        // Job state for async inject (avoids WebView2 COM proxy timeout on large downloads)
+        private string _injectJobState = "idle"; // idle | running | done | error
+        private string _injectJobError = "";
+
+        public string StartInject(string resourcesPath)
+        {
+            if (_injectJobState == "running")
+                return JsonSerializer.Serialize(new { started = false, error = "Already running" });
+
+            _injectJobState = "running";
+            _injectJobError = "";
+
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await EnsureDistAsync();
+                    await Task.Run(() => DoInject(resourcesPath));
+                    _injectJobState = "done";
+                }
+                catch (Exception ex)
+                {
+                    _injectJobError = ex.Message;
+                    _injectJobState = "error";
+                }
+            });
+
+            return JsonSerializer.Serialize(new { started = true });
+        }
+
+        public string GetInjectStatus()
+        {
+            return JsonSerializer.Serialize(new
+            {
+                state = _injectJobState,
+                error = _injectJobError
+            });
+        }
+
+        // Keep old Inject for compat but it just delegates
         public async Task<string> Inject(string resourcesPath)
         {
             try {
@@ -262,11 +314,24 @@ namespace NightcordInstaller
             _http.DefaultRequestHeaders.Add("User-Agent", "Nightcord-Installer/2.0");
             _http.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
 
-            var json = await _http.GetStringAsync(apiUrl);
+            string json;
+            try
+            {
+                json = await _http.GetStringAsync(apiUrl);
+            }
+            catch (TaskCanceledException)
+            {
+                throw new Exception("GitHub API timed out (30s). Check your internet connection and try again.");
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new Exception($"Could not reach GitHub: {ex.Message}. Check your internet connection.");
+            }
+
             var zipUrl = ExtractJsonValue(json, "browser_download_url", DIST_ZIP);
             
             if (string.IsNullOrEmpty(zipUrl))
-                throw new Exception($"'{DIST_ZIP}' not found in the GitHub release.");
+                throw new Exception($"'{DIST_ZIP}' not found in the GitHub release. The release may not be published yet.");
 
             SetProgress(5, "Starting download...");
             var tmpZip = Path.Combine(Path.GetTempPath(), "nightcord-dist.zip");
@@ -296,8 +361,8 @@ namespace NightcordInstaller
                             // Map 0-100% of download to 5%-75% of overall progress
                             double overallPercent = 5.0 + (percent * 0.70);
                             double totalMB = (double)totalBytes / (1024.0 * 1024.0);
-                            double readMB = (double)totalRead / (1024.0 * 1024.0);
-                            SetProgress(overallPercent, $"Downloading Nightcord ({readMB:F1} MB / {totalMB:F1} MB)...");
+                            double readMB  = (double)totalRead  / (1024.0 * 1024.0);
+                            SetProgress(overallPercent, "Downloading Nightcord...", readMB, totalMB);
                         }
                     }
                 }

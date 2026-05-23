@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Nightcord Installer</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
     :root {
       --bg:        #0b0b18;
@@ -19,12 +19,14 @@
       --success:   #4ade80;
       --error:     #f87171;
       --warn:      #fbbf24;
+      --font:      'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: 'Syne', sans-serif;
+      font-family: var(--font);
       background: var(--bg);
       color: var(--text);
       height: 100vh;
@@ -114,7 +116,7 @@
     }
 
     .header p {
-      font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.05em;
+      font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: 0.03em;
     }
 
     .section-row {
@@ -127,7 +129,7 @@
     }
 
     .btn-manual {
-      font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700;
+      font-family: var(--font); font-size: 10px; font-weight: 700;
       letter-spacing: .1em; text-transform: uppercase;
       background: rgba(123,108,255,0.1); color: var(--accent);
       border: 1px solid rgba(123,108,255,0.25); border-radius: 5px;
@@ -143,13 +145,13 @@
     .manual-input-row input {
       flex: 1; background: var(--surface); border: 1px solid var(--border);
       border-radius: 8px; padding: 9px 12px; color: var(--text);
-      font-family: 'Space Mono', monospace; font-size: 10px; outline: none;
+      font-family: var(--font-mono); font-size: 10px; outline: none;
       transition: border-color .15s;
     }
     .manual-input-row input:focus { border-color: var(--accent); }
 
     .manual-input-row button {
-      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px;
+      font-family: var(--font); font-weight: 700; font-size: 12px;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       color: white; border: none; border-radius: 8px; padding: 9px 16px; cursor: pointer;
     }
@@ -208,14 +210,14 @@
     .card-info h3 { font-size: 13px; font-weight: 700; color: var(--text); }
 
     .card-path {
-      font-family: 'Space Mono', monospace; font-size: 9px; color: var(--muted);
+      font-family: var(--font-mono); font-size: 9px; color: var(--muted);
       margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 360px;
     }
 
     .card-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
     .badge {
-      font-family: 'Space Mono', monospace; font-size: 9px;
+      font-family: var(--font-mono); font-size: 9px;
       padding: 3px 8px; border-radius: 4px; font-weight: 700; letter-spacing: 0.05em;
     }
 
@@ -238,7 +240,7 @@
 
     .btn {
       flex: 1; padding: 13px 24px; border-radius: 10px; border: none;
-      font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+      font-family: var(--font); font-size: 13px; font-weight: 700;
       letter-spacing: 0.05em; cursor: pointer; transition: all .15s;
     }
 
@@ -258,7 +260,7 @@
     .btn-danger:not(:disabled):hover { background: rgba(248,113,113,0.18); border-color: var(--error); }
 
     .status-bar {
-      font-family: 'Space Mono', monospace; font-size: 10px;
+      font-family: var(--font-mono); font-size: 10px;
       padding: 10px 40px; border-top: 1px solid var(--border);
       display: flex; align-items: center; gap: 8px;
       background: rgba(11,11,24,0.6);
@@ -316,10 +318,26 @@
       animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    .progress-text {
-      font-size: 13px; font-weight: 700; color: var(--text);
-      margin-bottom: 16px; letter-spacing: 0.05em;
+    .progress-label {
+      font-family: var(--font); font-size: 13px; font-weight: 600;
+      color: var(--text); display: block; margin-bottom: 10px;
     }
+
+    .progress-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      /* tabular-nums keeps digit widths stable — no layout shift */
+      font-variant-numeric: tabular-nums;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0;
+    }
+
+    .progress-stats-left  { text-align: left; min-width: 80px; }
+    .progress-stats-right { text-align: right; min-width: 50px; }
 
     .progress-bar-bg {
       width: 100%; height: 6px; background: rgba(123,108,255,0.1);
@@ -393,6 +411,7 @@
       font-size: 18px;
       font-weight: 700;
       color: var(--text);
+      font-family: var(--font);
     }
 
     .settings-close-btn {
@@ -411,7 +430,7 @@
       font-size: 11px;
       color: var(--muted);
       margin-bottom: 20px;
-      font-family: 'Space Mono', monospace;
+      font-family: var(--font);
     }
 
     .settings-buttons {
@@ -429,7 +448,7 @@
       border: 1px solid var(--border);
       border-radius: 8px;
       color: var(--text);
-      font-family: 'Syne', sans-serif;
+      font-family: var(--font);
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
@@ -467,7 +486,7 @@
       border: 1px solid rgba(74,222,128,0.25);
       border-radius: 8px;
       color: var(--success);
-      font-family: 'Syne', sans-serif;
+      font-family: var(--font);
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
@@ -488,7 +507,7 @@
       margin-top: 10px;
       padding: 10px 14px;
       border-radius: 8px;
-      font-family: 'Space Mono', monospace;
+      font-family: var(--font-mono);
       font-size: 11px;
       display: none;
     }
@@ -507,7 +526,7 @@
     .settings-dev-footer {
       margin-top: 18px;
       text-align: center;
-      font-family: 'Space Mono', monospace;
+      font-family: var(--font-mono);
       font-size: 9px;
       color: var(--muted);
       opacity: 0.6;
@@ -583,7 +602,11 @@
 
   <div class="progress-overlay" id="progress-overlay">
     <div class="progress-container">
-      <div class="progress-text" id="progress-text">Preparing injection...</div>
+      <span class="progress-label" id="progress-label">Preparing installation...</span>
+      <div class="progress-stats">
+        <span class="progress-stats-left"  id="progress-mb"></span>
+        <span class="progress-stats-right" id="progress-pct">0%</span>
+      </div>
       <div class="progress-bar-bg">
         <div class="progress-bar-fill" id="progress-fill"></div>
       </div>
@@ -652,14 +675,19 @@
       document.getElementById('status-text').textContent = text;
     }
 
-    function setLoading(v, text = "Loading...", percent = 100) {
+    // mbDownloaded / mbTotal can be passed optionally to show e.g. "47.3 / 347.0 MB"
+    function setLoading(v, text = "Loading...", percent = 100, mbDownloaded = null, mbTotal = null) {
       document.getElementById('progress-overlay').classList.toggle('visible', v);
       if (v) {
-        document.getElementById('progress-text').innerHTML = `
-          <span style="vertical-align: middle;">${text}</span>
-          <span class="loading-dots"><span></span><span></span><span></span></span>
-          <span style="color: var(--accent2); font-weight: 800; font-family: 'Space Mono', monospace; margin-left: 8px; vertical-align: middle;">${Math.round(percent)}%</span>
-        `;
+        const pct = Math.round(percent);
+        document.getElementById('progress-label').textContent = text;
+        document.getElementById('progress-pct').textContent   = pct + '%';
+        if (mbDownloaded !== null && mbTotal !== null) {
+          document.getElementById('progress-mb').textContent =
+            mbDownloaded.toFixed(1) + ' / ' + mbTotal.toFixed(1) + ' MB';
+        } else {
+          document.getElementById('progress-mb').textContent = '';
+        }
         document.getElementById('progress-fill').style.width = percent + '%';
       } else {
         setTimeout(() => { document.getElementById('progress-fill').style.width = '0%'; }, 300);
@@ -775,26 +803,47 @@
 
     async function handleInject() {
       if (!selected) return;
-      
-      setLoading(true, "Preparing installation...", 5);
+
+      setLoading(true, "Starting installation...", 2);
       setStatus('loading', `Injecting into ${selected.name}...`);
-      
-      // Real C# injection call
-      const result = await window.nightcord.inject(selected.path);
-      
-      if (result.success) {
-        setLoading(true, "Finalizing installation...", 100);
-        setTimeout(async () => {
-          setLoading(false);
-          setStatus('success', `✓ Nightcord injected into ${selected.name}! Restart Discord.`);
-          await loadDiscords();
-          const idx = discords.findIndex(d => d.path === selected.path);
-          if (idx !== -1) selectDiscord(idx);
-        }, 700);
-      } else {
+
+      // Use startInject (non-blocking) + poll getInjectStatus
+      // This avoids the WebView2 COM proxy 30s timeout on large downloads
+      const started = window.nightcord.startInject(selected.path);
+      if (!started || !started.started) {
         setLoading(false);
-        setStatus('error', `Error: ${result.error}`);
+        setStatus('error', `Error: ${started?.error || 'Could not start inject'}`);
+        return;
       }
+
+      // Poll every 500ms for status
+      await new Promise((resolve) => {
+        const interval = setInterval(() => {
+          const status = window.nightcord.getInjectStatus();
+          if (status.state === 'done') {
+            clearInterval(interval);
+            resolve({ success: true });
+          } else if (status.state === 'error') {
+            clearInterval(interval);
+            resolve({ success: false, error: status.error });
+          }
+          // 'running' → keep polling (progress bar updated by SetProgress from C#)
+        }, 500);
+      }).then(result => {
+        if (result.success) {
+          setLoading(true, "Finalizing installation...", 100);
+          setTimeout(async () => {
+            setLoading(false);
+            setStatus('success', `✓ Nightcord injected into ${selected.name}! Restart Discord.`);
+            await loadDiscords();
+            const idx = discords.findIndex(d => d.path === selected.path);
+            if (idx !== -1) selectDiscord(idx);
+          }, 700);
+        } else {
+          setLoading(false);
+          setStatus('error', `Error: ${result.error}`);
+        }
+      });
     }
 
     async function handleUninject() {
