@@ -16,7 +16,8 @@ import { serializeErrors } from "./common";
 const RELEASES_REPO = "nightcordoff/nightcord";
 const API_BASE      = `https://api.github.com/repos/${RELEASES_REPO}`;
 const REPO_URL      = `https://github.com/${RELEASES_REPO}`;
-const CURRENT_VERSION = `v${require("../../../package.json").version}`;
+declare const VERSION: string;
+const CURRENT_VERSION = `v${VERSION}`;
 const ZIP_FILE = "nightcord-dist.zip";
 
 let pendingDownloadUrl: string | null  = null;
