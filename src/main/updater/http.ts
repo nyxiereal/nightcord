@@ -80,13 +80,10 @@ async function applyUpdates(): Promise<boolean> {
         const zipPath = join(app.getPath("temp"), `nightcord-update-${Date.now()}.zip`);
         writeFileSync(zipPath, data, { flush: true });
 
-        // Resolve dist root from __dirname
-        // __dirname = ...\dist\desktop  →  distPath = ...\dist
-        const distIndex = __dirname.lastIndexOf("dist");
-        if (distIndex === -1) {
-            throw new Error("Cannot find 'dist' in path: " + __dirname);
-        }
-        const distPath = __dirname.substring(0, distIndex + 4);
+        // The zip was created from dist/desktop/ with includeBaseDirectory=false,
+        // so its contents are exactly what belongs in dist/desktop/ = __dirname.
+        // Using __dirname directly avoids the off-by-one-level bug.
+        const destPath = __dirname;
 
         // Extract using PowerShell Expand-Archive (reliable ZIP support on all Windows 10/11)
         // We extract to a temp folder first, then move files over to avoid half-extracted state
@@ -101,9 +98,8 @@ async function applyUpdates(): Promise<boolean> {
                     return reject(new Error("ZIP extraction failed: " + err.message));
                 }
 
-                // Step 2 — copy extracted files into distPath, overwriting existing ones
-                // Use robocopy for atomic overwrite (handles locked files better than fs.cpSync)
-                const psMove = `Copy-Item -Path '${tmpExtract}\\*' -Destination '${distPath}' -Recurse -Force`;
+                // Step 2 — copy extracted files into dist/desktop/ (= __dirname), overwriting existing ones
+                const psMove = `Copy-Item -Path '${tmpExtract}\\*' -Destination '${destPath}' -Recurse -Force`;
                 exec(`powershell -NoProfile -NonInteractive -Command "${psMove}"`, (err2) => {
                     // Cleanup temp files regardless of outcome
                     try { rmSync(zipPath,    { force: true }); } catch {}
