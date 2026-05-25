@@ -150,7 +150,9 @@ async function findYtDlp() {
 }
 
 // Cache des URLs résolues — évite de relancer yt-dlp pour la même URL
+// Limité à 100 entrées pour éviter les fuites mémoire
 const _resolvedUrlCache = new Map();
+const MAX_CACHE_SIZE = 100;
 
 async function resolveVideoUrl(url) {
     if (/\.(mp4|mkv|webm|m3u8|mov|avi)(\?|$)/i.test(url)) return url;
@@ -178,6 +180,10 @@ async function resolveVideoUrl(url) {
             const lines = out.trim().split("\n").filter(Boolean);
             if (!lines.length || code !== 0) { reject(new Error("yt-dlp échoué code=" + code)); return; }
             const resolved = lines[0].trim();
+            if (_resolvedUrlCache.size >= MAX_CACHE_SIZE) {
+                const firstKey = _resolvedUrlCache.keys().next().value;
+                _resolvedUrlCache.delete(firstKey);
+            }
             _resolvedUrlCache.set(url, { resolved, ts: Date.now() });
             resolve(resolved);
         });
@@ -220,7 +226,10 @@ async function preconnectGhost({ userId, token, micLabel, micDevice }) {
     const streamer = new DVS.Streamer(client);
 
     await new Promise((resolve, reject) => {
-        const t = setTimeout(() => reject(new Error("Login timeout")), 20000);
+        const t = setTimeout(() => {
+            client.destroy().catch(() => {});
+            reject(new Error("Login timeout"));
+        }, 20000);
         client.once("ready", () => { clearTimeout(t); resolve(); });
         client.once("error", e => { clearTimeout(t); reject(e); });
         client.login(token).catch(reject);
@@ -365,7 +374,7 @@ async function doJoinVoice(session, guildId, channelId) {
     }
 }
 
-async function joinVoiceSilent(userId, guildId, channelId, micLabel, micDevice) {
+async function joinVoiceSilent(userId, guildId, channelId, micLabel, micDevice, retryCount = 0) {
     const s = sessions.get(userId);
     if (!s) return { ok: false, error: "Session introuvable" };
     if (micLabel || micDevice) s.micLabel = micLabel || micDevice;
@@ -419,16 +428,12 @@ async function joinVoiceSilent(userId, guildId, channelId, micLabel, micDevice) 
                 const webRtcConn = udpConn.webRtcConn;
                 if (webRtcConn) {
                     let activated = false;
-                    webRtcConn.onStateChange(async (state) => {
+                    webRtcConn.onStateChange((state) => {
                         if (state === "connected" && !activated) {
                             activated = true;
                             activateAudio();
-                        } else if ((state === "failed" || state === "closed") && !activated) {
-                            // Retry silently
-                            try {
-                                await new Promise(r => setTimeout(r, 500));
-                                await joinVoiceSilent(userId, guildId, channelId, micLabel, micDevice);
-                            } catch { }
+                        } else if (state === "failed" && !activated) {
+                            console.warn(`[GhostServer] WebRTC failed for ${userId}, will try activation timeout`);
                         }
                     });
                     setTimeout(() => { if (!activated) { activated = true; activateAudio(); } }, 5000);
@@ -503,11 +508,14 @@ function startPermanentAudio(session, initialUdpConn) {
     }
 
     // Gestion du Pipeline Partagé par micro
+    // Vérifier à nouveau après résolution du device (évite race condition)
     if (sharedAudios.has(device)) {
         const shared = sharedAudios.get(device);
-        shared.users.set(session.userId, initialUdpConn);
-        console.log(`[GhostServer] Micro ${device} déjà actif, ajout de l'utilisateur ${session.userId} au flux partagé`);
-        return;
+        if (shared) {
+            shared.users.set(session.userId, initialUdpConn);
+            console.log(`[GhostServer] Micro ${device} déjà actif, ajout de l'utilisateur ${session.userId} au flux partagé`);
+            return;
+        }
     }
 
     console.log("[GhostServer] Nouveau flux ffmpeg pour micro: " + device);
@@ -524,6 +532,7 @@ function startPermanentAudio(session, initialUdpConn) {
 
     const shared = { proc, encoder, users: usersMap };
     sharedAudios.set(device, shared);
+    console.log("[GhostServer] Pipeline partagé créé pour device:", device);
 
     proc.stderr.on("data", d => {
         const msg = d.toString().trim();
@@ -604,7 +613,7 @@ function stopMic(session) {
 }
 
 function stopStream(session) {
-    if (session.videoProc) { try { process.kill(session.videoProc.pid, "SIGKILL"); } catch { } session.videoProc = null; }
+    if (session.videoProc) { try { session.videoProc.kill("SIGKILL"); } catch { } session.videoProc = null; }
     if (session.streamAbort) { try { session.streamAbort.abort(); } catch { } session.streamAbort = null; }
     if (session.ffmpegCommand) { try { session.ffmpegCommand.kill("SIGKILL"); } catch { } session.ffmpegCommand = null; }
     if (session.streamUdp && session.streamUdp !== session.udpConn) {
@@ -612,7 +621,6 @@ function stopStream(session) {
         session.streamUdp = null;
     }
     session.streaming = false;
-    // Nettoyer le job de stream si présent
     streamJobs.delete(session.userId);
 }
 
@@ -685,7 +693,10 @@ function readBody(req) {
     return new Promise((resolve, reject) => {
         let body = "";
         req.on("data", c => body += c);
-        req.on("end", () => { try { resolve(JSON.parse(body || "{}")); } catch { resolve({}); } });
+        req.on("end", () => {
+            try { resolve(JSON.parse(body || "{}")); }
+            catch (e) { reject(new Error("JSON invalide: " + e.message)); }
+        });
         req.on("error", reject);
     });
 }
