@@ -37,10 +37,8 @@ export const DEV_MIGRATED = join(SETTINGS_DIR, "migration");
 export const ALLOWED_PROTOCOLS = [
     "https:",
     "http:",
-    "file:",
     "steam:",
     "spotify:",
-    "com.epicgames.launcher:",
     "tidal:",
     "itunes:",
     "vrcx:",

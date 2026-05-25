@@ -35,7 +35,9 @@ export function ensureSafePath(basePath: string, path: string) {
     const normalizedBasePath = normalize(basePath + "/");
     const newPath = join(basePath, path);
     const normalizedPath = normalize(newPath);
-    return normalizedPath.startsWith(normalizedBasePath) ? normalizedPath : null;
+    const base = normalizedBasePath.toLowerCase();
+    const target = normalizedPath.toLowerCase();
+    return target.startsWith(base) ? normalizedPath : null;
 }
 
 function readCss() {
@@ -59,47 +61,100 @@ function getThemeData(fileName: string) {
 }
 
 ipcMain.handle(IpcEvents.WORLD_BOMB_TYPE, async (event, text: string, delay: number = 50) => {
-    const { exec } = require("child_process");
+    const { spawn } = require("child_process");
+    const { writeFileSync, unlinkSync, mkdtempSync } = require("fs");
+    const { join } = require("path");
+    const { tmpdir } = require("os");
 
-    let psScript = `Add-Type -AssemblyName System.Windows.Forms; `;
-    for (const char of text) {
-        let safeChar = char;
-        if ("+^%~()[]{}".includes(char)) safeChar = `{${char}}`;
-        psScript += `[System.Windows.Forms.SendKeys]::SendWait('${safeChar}'); `;
-        if (delay > 0) psScript += `Start-Sleep -m ${delay}; `;
+    if (!/^[\x20-\x7E]*$/.test(text)) {
+        throw new Error("WorldBombType: caractères non autorisés");
     }
+    const safeDelay = Math.max(0, Math.min(10000, delay));
 
-    exec(`powershell -Command "${psScript}"`);
+    const psLines = [
+        `Add-Type -AssemblyName System.WindowsForms;`,
+        `$text = $args[0];`,
+        `$delay = [int]$args[1];`,
+        `foreach ($char in $text.ToCharArray()) {`,
+        `  [System.Windows.Forms.SendKeys]::SendWait($char);`,
+        `  if ($delay -gt 0) { Start-Sleep -m $delay; }`,
+        `}`,
+    ];
+    const psScript = psLines.join("\r\n");
+    const tempDir = mkdtempSync(join(tmpdir(), "nightcord-wb-"));
+    const tempFile = join(tempDir, "sendkeys.ps1");
+    try {
+        writeFileSync(tempFile, "\uFEFF" + psScript, "utf8");
+        const child = spawn("powershell", [
+            "-NoProfile", "-ExecutionPolicy", "Bypass",
+            "-File", tempFile, text, String(safeDelay)
+        ]);
+        await new Promise<void>((resolve, reject) => {
+            child.on("error", reject);
+            child.on("exit", (code) => {
+                if (code === 0) resolve();
+                else reject(new Error(`PowerShell exit code ${code}`));
+            });
+        });
+    } finally {
+        try { unlinkSync(tempFile); } catch {}
+        try { rmdirSync(tempDir); } catch {}
+    }
 });
 
-ipcMain.handle(IpcEvents.WORLD_BOMB_PRESS_ENTER, (event) => {
-    const { exec } = require("child_process");
-    const psCmd = `
+function runPowershellScript(psScript: string): Promise<void> {
+    const { spawn } = require("child_process");
+    const { writeFileSync, unlinkSync, mkdtempSync } = require("fs");
+    const { join } = require("path");
+    const { tmpdir } = require("os");
+    const tempDir = mkdtempSync(join(tmpdir(), "nightcord-ps-"));
+    const tempFile = join(tempDir, "script.ps1");
+    return new Promise<void>((resolve, reject) => {
+        try {
+            writeFileSync(tempFile, "\uFEFF" + psScript, "utf8");
+            const child = spawn("powershell", [
+                "-NoProfile", "-ExecutionPolicy", "Bypass",
+                "-File", tempFile
+            ]);
+            child.on("error", reject);
+            child.on("exit", (code) => {
+                try { unlinkSync(tempFile); } catch {}
+                try { rmdirSync(tempDir); } catch {}
+                if (code === 0) resolve();
+                else reject(new Error(`PowerShell exit code ${code}`));
+            });
+        } catch (e) {
+            try { unlinkSync(tempFile); } catch {}
+            try { rmdirSync(tempDir); } catch {}
+            reject(e);
+        }
+    });
+}
+
+ipcMain.handle(IpcEvents.WORLD_BOMB_PRESS_ENTER, () => {
+    return runPowershellScript(`
         $sig = '[DllImport("user32.dll")] public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);'
         Add-Type -MemberDefinition $sig -Name WinAPI -Namespace NC -ErrorAction SilentlyContinue
         [NC.WinAPI]::keybd_event(0x0D, 0x1C, 0, [UIntPtr]::Zero)
         Start-Sleep -Milliseconds 20
         [NC.WinAPI]::keybd_event(0x0D, 0x1C, 2, [UIntPtr]::Zero)
-    `.replace(/\s+/g, " ");
-    exec(`powershell -Command "${psCmd}"`);
+    `);
 });
 
-ipcMain.handle(IpcEvents.WORLD_BOMB_PRESS_BACKSPACE, (event) => {
-    const { exec } = require("child_process");
-    const psCmd = `Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait('{BACKSPACE}')`;
-    exec(`powershell -Command "${psCmd}"`);
+ipcMain.handle(IpcEvents.WORLD_BOMB_PRESS_BACKSPACE, () => {
+    return runPowershellScript(`Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait('{BACKSPACE}')`);
 });
 
 ipcMain.handle(IpcEvents.WORLD_BOMB_CLICK, (event, x: number, y: number) => {
-    const { exec } = require("child_process");
-
-    const psCmd = `
+    const safeX = Math.max(0, Math.min(99999, Math.round(x)));
+    const safeY = Math.max(0, Math.min(99999, Math.round(y)));
+    return runPowershellScript(`
+        Add-Type -AssemblyName System.Windows.Forms -ErrorAction SilentlyContinue
         Add-Type -MemberDefinition '[DllImport("user32.dll")] public static extern void mouse_event(int dwFlags, int dx, int dy, int dwData, int dwExtraInfo);' -Name "Win32" -Namespace Win32 -PassThru | Out-Null;
-        [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point(${x}, ${y});
+        [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point(${safeX}, ${safeY});
         [Win32.Win32]::mouse_event(0x0002, 0, 0, 0, 0);
         [Win32.Win32]::mouse_event(0x0004, 0, 0, 0, 0);
-    `.replace(/\s+/g, " ");
-    exec(`powershell -Command "Add-Type -AssemblyName System.Windows.Forms; ${psCmd}"`);
+    `);
 });
 
 ipcMain.handle(IpcEvents.WORLD_BOMB_SEQUENCE, async (
@@ -110,113 +165,84 @@ ipcMain.handle(IpcEvents.WORLD_BOMB_SEQUENCE, async (
     targetX: number = -1,
     targetY: number = -1
 ) => {
-    return new Promise<void>((resolve, reject) => {
-        const { spawn } = require("child_process");
+    const { spawn } = require("child_process");
+    const { writeFileSync, unlinkSync, mkdtempSync } = require("fs");
+    const { join } = require("path");
+    const { tmpdir } = require("os");
 
-        const win = BrowserWindow.fromWebContents(event.sender);
-        const bounds = win?.getBounds() ?? { x: 0, y: 0, width: 1280, height: 720 };
-        const centerX = targetX >= 0 ? targetX : Math.round(bounds.x + bounds.width / 2);
-        const centerY = targetY >= 0 ? targetY : Math.round(bounds.y + bounds.height / 2);
+    if (!/^[\x20-\x7E]+$/.test(word)) {
+        throw new Error("WorldBombSequence: caractères non autorisés");
+    }
+    const safeLps = Math.max(1, Math.min(100, lps));
+    const safeHumanChance = Math.max(0, Math.min(100, humanChance));
 
-        const hWnd = win?.getNativeWindowHandle();
-        let hWndStr = "0";
-        try {
-            if (hWnd && hWnd.length >= 4) {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    const bounds = win?.getBounds() ?? { x: 0, y: 0, width: 1280, height: 720 };
+    const centerX = targetX >= 0 ? Math.round(targetX) : Math.round(bounds.x + bounds.width / 2);
+    const centerY = targetY >= 0 ? Math.round(targetY) : Math.round(bounds.y + bounds.height / 2);
 
-                const lo = hWnd.readUInt32LE(0);
-                const hi = hWnd.length >= 8 ? hWnd.readUInt32LE(4) : 0;
-                if (hi !== 0) {
+    const minMs = Math.max(10, Math.round(1000 / (safeLps * 1.5)));
+    const maxMs = Math.max(minMs + 1, Math.round(1000 / safeLps));
+    const baseMs = Math.round((minMs + maxMs) / 2);
 
-                    hWndStr = (BigInt(hi) * 0x100000000n + BigInt(lo)).toString();
-                } else {
-                    hWndStr = lo.toString();
-                }
-            }
-        } catch (e) {
-            console.error("[WorldBomb] Erreur lecture HWND:", e);
+    const lines: string[] = [
+        `$ErrorActionPreference = "Stop"`,
+        `try {`,
+        `  Add-Type -AssemblyName System.Windows.Forms`,
+        `  Add-Type -AssemblyName System.Drawing`,
+        `  $sig = '[DllImport("user32.dll")] public static extern void mouse_event(uint a, uint b, uint c, uint d, uint e); [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h); [DllImport("user32.dll")] public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);'`,
+        `  Add-Type -MemberDefinition $sig -Name WinAPI -Namespace NC -ErrorAction SilentlyContinue`,
+        `  $handle = [IntPtr]::Zero`,
+        `  $proc = Get-Process -Id ${process.pid} -ErrorAction SilentlyContinue`,
+        `  if ($proc) { $handle = $proc.MainWindowHandle }`,
+        `  if ($handle -ne [IntPtr]::Zero) {`,
+        `    [NC.WinAPI]::SetForegroundWindow($handle) | Out-Null`,
+        `    Start-Sleep -Milliseconds 10`,
+        `  }`,
+        `  [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point(${centerX}, ${centerY})`,
+        `  [NC.WinAPI]::mouse_event(2, 0, 0, 0, 0)`,
+        `  [NC.WinAPI]::mouse_event(4, 0, 0, 0, 0)`,
+        `  Start-Sleep -Milliseconds 10`,
+    ];
+
+    for (const char of word) {
+        if (safeHumanChance > 0) {
+            lines.push(`  if ((Get-Random -Minimum 1 -Maximum 101) -le ${safeHumanChance}) {`);
+            lines.push(`    [System.Windows.Forms.SendKeys]::SendWait('x')`);
+            lines.push(`    Start-Sleep -Milliseconds ${baseMs}`);
+            lines.push(`    [System.Windows.Forms.SendKeys]::SendWait('{BACKSPACE}')`);
+            lines.push(`    Start-Sleep -Milliseconds ${baseMs}`);
+            lines.push(`  }`);
         }
+        lines.push(`  [System.Windows.Forms.SendKeys]::SendWait('${char.replace(/'/g, "''")}')`);
+        lines.push(`  Start-Sleep -Milliseconds (Get-Random -Minimum ${minMs} -Maximum ${maxMs})`);
+    }
 
-        const currentPid = process.pid;
+    lines.push(`  [NC.WinAPI]::keybd_event(0x0D, 0x1C, 0, [UIntPtr]::Zero)`);
+    lines.push(`  Start-Sleep -Milliseconds 20`);
+    lines.push(`  [NC.WinAPI]::keybd_event(0x0D, 0x1C, 2, [UIntPtr]::Zero)`);
+    lines.push(`} catch { exit 1 }`);
 
-        const lines: string[] = [];
-        lines.push(`$ErrorActionPreference = "Stop"`);
-        lines.push(`try {`);
-        lines.push(`  Add-Type -AssemblyName System.Windows.Forms`);
-        lines.push(`  Add-Type -AssemblyName System.Drawing`);
-        lines.push(`  $sig = '[DllImport("user32.dll")] public static extern void mouse_event(uint a, uint b, uint c, uint d, uint e); [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h); [DllImport("user32.dll")] public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);'`);
-        lines.push(`  Add-Type -MemberDefinition $sig -Name WinAPI -Namespace NC -ErrorAction SilentlyContinue`);
-
-        lines.push(`  $handle = [IntPtr]::Zero`);
-        lines.push(`  if (${hWndStr} -ne 0) { $handle = [IntPtr]${hWndStr} }`);
-        lines.push(`  else {`);
-        lines.push(`    $proc = Get-Process -Id ${currentPid} -ErrorAction SilentlyContinue`);
-        lines.push(`    if ($proc) { $handle = $proc.MainWindowHandle }`);
-        lines.push(`  }`);
-        lines.push(`  if ($handle -ne [IntPtr]::Zero) {`);
-        lines.push(`    [NC.WinAPI]::SetForegroundWindow($handle) | Out-Null`);
-        lines.push(`    Start-Sleep -Milliseconds 10`);
-        lines.push(`  }`);
-
-        lines.push(`  [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point(${centerX}, ${centerY})`);
-        lines.push(`  [NC.WinAPI]::mouse_event(2, 0, 0, 0, 0)`);
-        lines.push(`  [NC.WinAPI]::mouse_event(4, 0, 0, 0, 0)`);
-        lines.push(`  Start-Sleep -Milliseconds 10`);
-
-        for (const char of word) {
-            const minMs = Math.max(10, Math.round(1000 / (lps * 1.5)));
-            const maxMs = Math.max(minMs + 1, Math.round(1000 / lps));
-            const baseMs = Math.round((minMs + maxMs) / 2);
-
-            if (humanChance > 0) {
-                lines.push(`  if ((Get-Random -Minimum 1 -Maximum 101) -le ${humanChance}) {`);
-                const typoChar = "abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random() * 26)];
-                let safeTypo = typoChar;
-                if ("+^%~()[]{}".includes(typoChar)) safeTypo = `{${typoChar}}`;
-                lines.push(`    [System.Windows.Forms.SendKeys]::SendWait('${safeTypo.replace(/'/g, "''")}')`);
-                lines.push(`    Start-Sleep -Milliseconds ${baseMs}`);
-                lines.push(`    [System.Windows.Forms.SendKeys]::SendWait('{BACKSPACE}')`);
-                lines.push(`    Start-Sleep -Milliseconds ${baseMs}`);
-                lines.push(`  }`);
-            }
-
-            let safeChar = char;
-            if ("+^%~()[]{}".includes(char)) safeChar = `{${char}}`;
-            const psSafeChar = safeChar.replace(/'/g, "''");
-            lines.push(`  [System.Windows.Forms.SendKeys]::SendWait('${psSafeChar}')`);
-            lines.push(`  Start-Sleep -Milliseconds (Get-Random -Minimum ${minMs} -Maximum ${maxMs})`);
-        }
-
-        lines.push(`  [NC.WinAPI]::keybd_event(0x0D, 0x1C, 0, [UIntPtr]::Zero)`);
-        lines.push(`  Start-Sleep -Milliseconds 20`);
-        lines.push(`  [NC.WinAPI]::keybd_event(0x0D, 0x1C, 2, [UIntPtr]::Zero)`);
-        lines.push(`} catch { exit 1 }`);
-
-        const psScript = lines.join("\r\n");
-
-        const utf16buf = Buffer.from(psScript, "utf16le");
-        const encoded = utf16buf.toString("base64");
-
-        try {
+    const psScript = lines.join("\r\n");
+    const tempDir = mkdtempSync(join(tmpdir(), "nightcord-wbs-"));
+    const tempFile = join(tempDir, "sequence.ps1");
+    try {
+        writeFileSync(tempFile, "\uFEFF" + psScript, "utf8");
+        await new Promise<void>((resolve, reject) => {
             const child = spawn("powershell.exe", [
-                "-NoProfile",
-                "-NonInteractive",
-                "-WindowStyle", "Hidden",
-                "-EncodedCommand", encoded
+                "-NoProfile", "-ExecutionPolicy", "Bypass",
+                "-File", tempFile
             ]);
-
-            child.on("error", (err) => {
-                console.error("[WorldBomb] Erreur spawn powershell.exe:", err);
-                reject(err);
-            });
-
+            child.on("error", reject);
             child.on("exit", (code) => {
                 if (code === 0) resolve();
-                else reject(new Error(`PowerShell exited with code ${code}`));
+                else reject(new Error(`PowerShell exit code ${code}`));
             });
-        } catch (e) {
-            reject(e);
-        }
-    });
+        });
+    } finally {
+        try { unlinkSync(tempFile); } catch {}
+        try { rmdirSync(tempDir); } catch {}
+    }
 });
 
 let globalHookProcess: any = null;
@@ -294,7 +320,8 @@ ${code}
 [KeyHook]::Main()
 `;
 
-    const tempFile = join(tmpdir(), `global_hook_${Date.now()}.ps1`);
+    const tempDir = mkdtempSync(join(tmpdir(), "nightcord-kb-"));
+    const tempFile = join(tempDir, "global_hook.ps1");
     try {
         writeFileSync(tempFile, "\uFEFF" + psScript, "utf8");
         globalHookProcess = spawn("powershell", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-WindowStyle", "Hidden", "-File", tempFile]);
@@ -337,15 +364,17 @@ ipcMain.handle(IpcEvents.WORLD_BOMB_OPEN_WINDOW, (event, lps: number = 50, human
     }
 
     streamProofWindow = new BrowserWindow({
-        width: 332, // 300 + padding
+        width: 332,
         height: 300,
         transparent: true,
         frame: false,
         alwaysOnTop: true,
         resizable: false,
         webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false
+            nodeIntegration: false,
+            contextIsolation: true,
+            preload: join(__dirname, "worldbomb-preload.js"),
+            sandbox: false
         }
     });
 
@@ -393,7 +422,6 @@ body { margin: 0; padding: 16px; background: transparent; overflow: hidden; font
     </div>
 </div>
 <script>
-    const { ipcRenderer } = require('electron');
     let dictionary = [];
     let history = [];
     let badWords = new Set();
@@ -578,7 +606,7 @@ body { margin: 0; padding: 16px; background: transparent; overflow: hidden; font
         }
         
 
-        ipcRenderer.invoke("WorldBombSequence", bestWord, lps, humanChance)
+        window.worldBombAPI.sequence(bestWord, lps, humanChance)
             .then(() => {
                 document.getElementById('status').innerText = "Prêt !";
             })
@@ -864,61 +892,51 @@ ipcMain.handle(IpcEvents.RELAUNCH_APP, async () => {
     app.exit(0);
 });
 
+const OFFICIAL_UPDATE_URL = "https://github.com/nightcordoff/nightcord/releases/latest/download/Nightcord-Installer.exe";
+
 ipcMain.handle(IpcEvents.NIGHTCORD_DOWNLOAD_AND_RUN, async (_, url: string) => {
+    if (url !== OFFICIAL_UPDATE_URL) {
+        throw new Error("URL de mise à jour non autorisée");
+    }
+
     const https = require("https");
     const os = require("os");
     const path = require("path");
     const fs = require("original-fs");
-    const { exec } = require("child_process");
+    const crypto = require("crypto");
 
     const tmpPath = path.join(os.tmpdir(), "NightcordUpdate-Setup.exe");
-    const allowedHosts = new Set([
-        "github.com",
-        "objects.githubusercontent.com",
-        "github-releases.githubusercontent.com"
-    ]);
-    const validateUpdateUrl = (value: string) => {
-        const parsed = new URL(value);
-        if (parsed.protocol !== "https:" || !allowedHosts.has(parsed.hostname)) {
-            throw new Error("Untrusted update URL");
-        }
-        return parsed;
-    };
-    validateUpdateUrl(url);
 
     await new Promise<void>((resolve, reject) => {
-
-        const resolveRedirects = (redirectUrl: string, maxRedirects = 10) => {
-            if (maxRedirects === 0) { reject(new Error("Too many redirects")); return; }
-            validateUpdateUrl(redirectUrl);
-            https.get(redirectUrl, (res: any) => {
-                if (res.statusCode === 301 || res.statusCode === 302) {
-                    if (!res.headers.location) { reject(new Error("Missing redirect location")); return; }
-                    res.resume(); // consomme la réponse pour libérer le socket
-                    return resolveRedirects(res.headers.location, maxRedirects - 1);
-                }
-                if (res.statusCode !== 200) {
-                    res.resume();
-                    reject(new Error(`HTTP ${res.statusCode}`));
-                    return;
-                }
-
-                const file = fs.createWriteStream(tmpPath);
-                res.pipe(file);
-                file.on("finish", () => file.close(() => resolve()));
-                file.on("error", (err: any) => { fs.unlink(tmpPath, () => { }); reject(err); });
-                res.on("error", (err: any) => { fs.unlink(tmpPath, () => { }); reject(err); });
-            }).on("error", (err: any) => {
-                fs.unlink(tmpPath, () => { });
-                reject(err);
-            });
-        };
-
-        resolveRedirects(url);
+        https.get(url, (res: any) => {
+            if (res.statusCode !== 200) {
+                res.resume();
+                reject(new Error(`HTTP ${res.statusCode}`));
+                return;
+            }
+            const file = fs.createWriteStream(tmpPath);
+            res.pipe(file);
+            file.on("finish", () => file.close(() => resolve()));
+            file.on("error", (err: any) => { fs.unlink(tmpPath, () => { }); reject(err); });
+            res.on("error", (err: any) => { fs.unlink(tmpPath, () => { }); reject(err); });
+        }).on("error", (err: any) => {
+            fs.unlink(tmpPath, () => { });
+            reject(err);
+        });
     });
 
+    const { response } = await dialog.showMessageBox({
+        type: "info",
+        buttons: ["Installer la mise à jour", "Annuler"],
+        defaultId: 0,
+        title: "Mise à jour Nightcord",
+        message: "Une mise à jour de Nightcord est disponible.",
+        detail: "Voulez-vous installer la mise à jour maintenant ?"
+    });
+    if (response === 1) return false;
+
     const { spawn } = require("child_process");
-    const child = spawn(tmpPath, ["/SILENT"], {
+    const child = spawn(tmpPath, [], {
         detached: true,
         stdio: "ignore"
     });
@@ -939,7 +957,7 @@ ipcMain.handle(IpcEvents.CHECK_VB_CABLE, async () => {
 ipcMain.handle(IpcEvents.INSTALL_VB_CABLE, async () => {
     if (process.platform !== "win32") return { success: false, error: "Windows only" };
 
-    const { exec } = require("child_process");
+    const { spawn } = require("child_process");
     const os = require("os");
     const path = require("path");
     const fs = require("fs");
@@ -951,23 +969,55 @@ ipcMain.handle(IpcEvents.INSTALL_VB_CABLE, async () => {
     try { if (fs.existsSync(tmpDir)) fs.rmSync(tmpDir, { recursive: true, force: true }); } catch { }
     fs.mkdirSync(tmpDir, { recursive: true });
 
-    return new Promise((resolve) => {
-
-        const psCmd = `
-            Invoke-WebRequest -Uri "${zipUrl}" -OutFile "${tmpZip}";
-            Expand-Archive -Path "${tmpZip}" -DestinationPath "${tmpDir}" -Force;
-            Start-Process -FilePath "${path.join(tmpDir, "VBCABLE_Setup_x64.exe")}" -ArgumentList "/SILENT" -Verb RunAs -Wait;
-        `.replace(/\s+/g, " ");
-
-        exec(`powershell -Command "${psCmd}"`, (err: any) => {
-            if (err) {
-                console.error("[Nightcord] VBCable install failed:", err);
-                resolve({ success: false, error: "Installation failed (Elevation probably required)" });
-            } else {
-                resolve({ success: true });
-            }
-
-            try { fs.unlinkSync(tmpZip); } catch { }
+    try {
+        await new Promise<void>((resolve, reject) => {
+            const child = spawn("powershell", [
+                "-NoProfile", "-ExecutionPolicy", "Bypass",
+                "-Command",
+                `Invoke-WebRequest -Uri "${zipUrl}" -OutFile "${tmpZip}";` +
+                `Expand-Archive -Path "${tmpZip}" -DestinationPath "${tmpDir}" -Force;`
+            ]);
+            child.on("error", reject);
+            child.on("exit", (code) => {
+                if (code === 0) resolve();
+                else reject(new Error(`Download/Extract failed with code ${code}`));
+            });
         });
-    });
+
+        const installerPath = path.join(tmpDir, "VBCABLE_Setup_x64.exe");
+        if (!fs.existsSync(installerPath)) {
+            return { success: false, error: "Installer not found after extraction" };
+        }
+
+        const { response } = await dialog.showMessageBox({
+            type: "info",
+            buttons: ["Installer VB-Cable", "Annuler"],
+            defaultId: 0,
+            title: "Installation VB-Cable",
+            message: "VB-Cable doit être installé avec les droits administrateur.",
+            detail: "Une fenêtre UAC va s'ouvrir pour confirmer l'installation."
+        });
+        if (response === 1) return { success: false, error: "Annulé par l'utilisateur" };
+
+        await new Promise<void>((resolve, reject) => {
+            const child = spawn("powershell", [
+                "-NoProfile", "-ExecutionPolicy", "Bypass",
+                "-Command",
+                `Start-Process -FilePath "${installerPath}" -ArgumentList "/SILENT" -Verb RunAs -Wait;`
+            ]);
+            child.on("error", reject);
+            child.on("exit", (code) => {
+                if (code === 0) resolve();
+                else reject(new Error(`Install failed with code ${code}`));
+            });
+        });
+
+        return { success: true };
+    } catch (err: any) {
+        console.error("[Nightcord] VBCable install failed:", err);
+        return { success: false, error: "Installation failed: " + (err.message || err) };
+    } finally {
+        try { fs.unlinkSync(tmpZip); } catch {}
+        try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
+    }
 });
