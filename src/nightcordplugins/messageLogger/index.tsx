@@ -664,8 +664,6 @@ export default definePlugin({
         );
     },
 
-    // DELETED_MESSAGE_COUNT: getMessage("{count, plural, =0 {No deleted messages} one {{count} deleted message} other {{count} deleted messages}}")
-    // TODO: Find a better way to generate intl messages
     DELETED_MESSAGE_COUNT: () => ({
         ast: [[
             6,

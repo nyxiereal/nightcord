@@ -67,7 +67,7 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Automatically translate your messages before sending. You can also shift/right click the translate button to toggle this",
         default: false,
-        disabled: () => true  // Disabled — never auto-translate
+        disabled: () => true // Disabled — never auto-translate
     },
     showAutoTranslateTooltip: {
         type: OptionType.BOOLEAN,

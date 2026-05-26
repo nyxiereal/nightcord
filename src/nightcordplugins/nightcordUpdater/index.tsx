@@ -1,12 +1,12 @@
 /*
- * Nightcord — Auto-updater plugin
- * Au lancement : vérifie GitHub, affiche une bannière verte si version distante > locale.
- * Clic "Mettre à jour" : télécharge le Setup.exe via IPC main → le lance automatiquement.
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import definePlugin from "@utils/types";
-import { React, useState, useEffect } from "@webpack/common";
 import { findByPropsLazy } from "@webpack";
+import { React, useEffect,useState } from "@webpack/common";
 
 // ── Config ────────────────────────────────────────────────────────────────────
 const REMOTE_VERSION_URL =
@@ -96,7 +96,7 @@ function UpdateBanner() {
         setStatus("Téléchargement en cours...");
 
         try {
-            const VencordNative = (window as any).VencordNative;
+            const { VencordNative } = (window as any);
             const ipc = VencordNative?.updater;
             if (!ipc) throw new Error("VencordNative.updater non disponible");
 

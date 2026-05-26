@@ -17,7 +17,6 @@ import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { HashLink } from "@components/settings/tabs/updater/Components";
 import { Margins } from "@utils/margins";
-import { useAwaiter } from "@utils/react";
 import { UpdateLogger } from "@utils/updater";
 import { Alerts, React, Toasts } from "@webpack/common";
 

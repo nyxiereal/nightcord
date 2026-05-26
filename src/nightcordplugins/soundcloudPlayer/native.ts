@@ -1,12 +1,7 @@
 /*
- * Equicord, a modification for Discord's desktop app
- * Copyright (c) 2024 Vendicated and contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
- *
- * SoundCloud Player — native.ts (main process Electron)
- *
- * Alles les requêtes HTTP passent par net.fetch d'Electron pour
- * contourner le CSP de Discord qui bloque fetch() depuis le renderer.
  */
 
 import { IpcMainInvokeEvent, net } from "electron";

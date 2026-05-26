@@ -120,7 +120,7 @@ export default {
             ipcRenderer.removeAllListeners(IpcEvents.THUMBAR_BUTTON_CLICK);
         },
     },
-    
+
     worldBomb: {
         type: (text: string, delay: number) => invoke(IpcEvents.WORLD_BOMB_TYPE, text, delay),
         pressEnter: () => invoke(IpcEvents.WORLD_BOMB_PRESS_ENTER),

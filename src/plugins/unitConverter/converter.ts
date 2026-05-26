@@ -20,11 +20,10 @@ interface regexes {
         };
     };
 }
-// TODO: add grams, kilograms, ounces, and pounds
 const regexes: regexes = {
     // matches imperial units, converts them to metric
     imperial: {
-        farenheight: {
+        fahrenheit: {
             regex: /(-?\d+(?:\.\d+)?)°?(f)(?!\w)/ig,
             convert(...groups) {
                 const c = ((parseFloat(groups[1]) - 32) * (5 / 9)).toFixed(2);
@@ -91,7 +90,7 @@ const regexes: regexes = {
             },
         }
     },
-    // matches metric untis, converts them into imperial
+    // matches metric units, converts them into imperial
     metric: {
         // i dont think people ever write metric units as 1m3cm or something like that
         celcius: {
@@ -119,7 +118,7 @@ const regexes: regexes = {
                 return `${m.toFixed(0)}ft${((m % 1) * 12).toFixed(2)}in`;
             },
         },
-        // covnert to miles
+        // convert to miles
         kilometers: {
             regex: /(\d+(?:\.\d+)?) ?(km|kilometers?|kms?)(?!\w)/gi,
             convert(...groups) {

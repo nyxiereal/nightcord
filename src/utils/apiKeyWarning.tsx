@@ -1,9 +1,11 @@
 /*
- * Nightcord — Utilitaire pop-up clé API manquante
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import { openPluginModal } from "@components/settings/tabs/plugins/PluginModal";
-import { openModal, ModalRoot, ModalContent, ModalFooter } from "@utils/modal";
+import { ModalContent, ModalFooter,ModalRoot, openModal } from "@utils/modal";
 import { React } from "@webpack/common";
 
 import Plugins from "~plugins";
@@ -40,7 +42,7 @@ function ApiKeyWarningModal({ pluginName, onClose }: { pluginName: string; onClo
                     }}
                     onClick={() => {
                         onClose();
-                        const plugin = Plugins["NightcordAI"];
+                        const plugin = Plugins.NightcordAI;
                         if (plugin) openPluginModal(plugin);
                     }}
                 >

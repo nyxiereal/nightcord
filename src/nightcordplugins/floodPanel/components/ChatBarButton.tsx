@@ -8,8 +8,8 @@ import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { openModal } from "@utils/modal";
 import { useState } from "@webpack/common";
 
-import { FloodIcon } from "./Icons";
 import { FloodModal } from "./FloodModal";
+import { FloodIcon } from "./Icons";
 
 export const FloodPanelButton: ChatBarButtonFactory = ({ isMainChat, channel }) => {
     const [isRunning, setIsRunning] = useState(false);

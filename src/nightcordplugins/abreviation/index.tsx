@@ -1,16 +1,16 @@
 /*
- * Equicord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import "./styles.css";
 
+import { DataStore } from "@api/index";
 import { addMessagePreSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
-import { DataStore } from "@api/index";
 import definePlugin, { OptionType } from "@utils/types";
-import { React, useState, useEffect } from "@webpack/common";
+import { React, useEffect,useState } from "@webpack/common";
 
 const DS_KEY = "abreviation_entries";
 

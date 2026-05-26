@@ -1,14 +1,15 @@
 /*
- * Nightcord — Updater utilities (renderer-side)
- * Wraps IPC calls vers le main process (http.ts)
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import { Logger } from "./Logger";
 import { IpcRes } from "./types";
 
 export const UpdateLogger = /* #__PURE__ */ new Logger("Updater", "white");
-export let isOutdated  = false;
-export let isNewer     = false;
+export let isOutdated = false;
+export const isNewer = false;
 export let updateError: any;
 export let changes: Record<"hash" | "author" | "message", string>[] = [];
 

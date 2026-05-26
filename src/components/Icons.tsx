@@ -801,7 +801,6 @@ export const ComponentsIcon = (props?: any) => {
     );
 };
 
-
 // ─── Compatibility icons for Equicord/Vencord plugins ─────────────────────────
 
 export function HeadphonesIcon(props: IconProps) {

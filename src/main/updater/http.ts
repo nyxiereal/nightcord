@@ -1,28 +1,29 @@
 /*
- * Nightcord — Auto-updater (HTTP / GitHub Releases via ASAR)
- * Vérifie les releases sur GitHub, télécharge le desktop.asar et remplace l'ancien.
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import { fetchBuffer, fetchJson } from "@main/utils/http";
 import { IpcEvents } from "@shared/IpcEvents";
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
-import { ipcMain, app } from "electron";
-import { writeFileSync, rmSync } from "original-fs";
-import { join } from "path";
 import { exec } from "child_process";
+import { app,ipcMain } from "electron";
+import { rmSync,writeFileSync } from "original-fs";
+import { join } from "path";
 
 import { serializeErrors } from "./common";
 
 const RELEASES_REPO = "nightcordoff/nightcord";
-const API_BASE      = `https://api.github.com/repos/${RELEASES_REPO}`;
-const REPO_URL      = `https://github.com/${RELEASES_REPO}`;
+const API_BASE = `https://api.github.com/repos/${RELEASES_REPO}`;
+const REPO_URL = `https://github.com/${RELEASES_REPO}`;
 declare const VERSION: string;
 const CURRENT_VERSION = `v${VERSION}`;
 const ZIP_FILE = "nightcord-dist.zip";
 
-let pendingDownloadUrl: string | null  = null;
-let pendingVersion:     string | null  = null;
-let isApplying                         = false;
+let pendingDownloadUrl: string | null = null;
+let pendingVersion: string | null = null;
+let isApplying = false;
 
 async function githubGet<T = any>(endpoint: string): Promise<T> {
     return fetchJson<T>(API_BASE + endpoint, {
@@ -55,7 +56,7 @@ async function fetchUpdates(): Promise<boolean> {
     if (!asset) return false;
 
     pendingDownloadUrl = asset.browser_download_url;
-    pendingVersion     = latestTag;
+    pendingVersion = latestTag;
     return true;
 }
 
@@ -93,7 +94,7 @@ async function applyUpdates(): Promise<boolean> {
         return await new Promise<boolean>((resolve, reject) => {
             // Step 1 — extract zip to temp folder
             const psExtract = `Expand-Archive -LiteralPath '${zipPath}' -DestinationPath '${tmpExtract}' -Force`;
-            exec(`powershell -NoProfile -NonInteractive -Command "${psExtract}"`, (err) => {
+            exec(`powershell -NoProfile -NonInteractive -Command "${psExtract}"`, err => {
                 if (err) {
                     try { rmSync(zipPath, { force: true }); } catch {}
                     return reject(new Error("ZIP extraction failed: " + err.message));
@@ -101,9 +102,9 @@ async function applyUpdates(): Promise<boolean> {
 
                 // Step 2 — copy extracted files into dist/desktop/ (= __dirname), overwriting existing ones
                 const psMove = `Copy-Item -Path '${tmpExtract}\\*' -Destination '${destPath}' -Recurse -Force`;
-                exec(`powershell -NoProfile -NonInteractive -Command "${psMove}"`, (err2) => {
+                exec(`powershell -NoProfile -NonInteractive -Command "${psMove}"`, err2 => {
                     // Cleanup temp files regardless of outcome
-                    try { rmSync(zipPath,    { force: true }); } catch {}
+                    try { rmSync(zipPath, { force: true }); } catch {}
                     try { rmSync(tmpExtract, { recursive: true, force: true }); } catch {}
 
                     if (err2) {
@@ -124,7 +125,7 @@ async function applyUpdates(): Promise<boolean> {
 // ─── Auto-update on quit ─────────────────────────────────────────────────────
 // Si une mise à jour est en attente quand Discord se ferme, on l'installe
 // silencieusement avant de quitter (timeout de sécurité 45s).
-app.on("before-quit", (event) => {
+app.on("before-quit", event => {
     // Ne tenter l'update que si une URL est en attente ET qu'on n'est pas déjà en train
     if (!pendingDownloadUrl || isApplying) return;
 
@@ -142,7 +143,7 @@ app.on("before-quit", (event) => {
     applyUpdates()
         .then(ok => {
             if (ok) console.log("[Nightcord] Update applied successfully on quit.");
-            else    console.warn("[Nightcord] Update on quit returned false.");
+            else console.warn("[Nightcord] Update on quit returned false.");
         })
         .catch(err => {
             console.error("[Nightcord] Update on quit failed:", err);
@@ -156,7 +157,7 @@ app.on("before-quit", (event) => {
         });
 });
 
-ipcMain.handle(IpcEvents.GET_REPO,    serializeErrors(() => REPO_URL));
+ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(() => REPO_URL));
 ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors(getUpdates));
-ipcMain.handle(IpcEvents.UPDATE,      serializeErrors(fetchUpdates));
-ipcMain.handle(IpcEvents.BUILD,       serializeErrors(applyUpdates));
+ipcMain.handle(IpcEvents.UPDATE, serializeErrors(fetchUpdates));
+ipcMain.handle(IpcEvents.BUILD, serializeErrors(applyUpdates));

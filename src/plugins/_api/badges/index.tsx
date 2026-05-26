@@ -20,7 +20,6 @@ import "./fixDiscordBadgePadding.css";
 
 import { _getBadges, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
 import ErrorBoundary from "@components/ErrorBoundary";
-
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
 import { Logger } from "@utils/Logger";
@@ -172,8 +171,6 @@ export default definePlugin({
     get NightcordBadges() {
         return NightcordBadges;
     },
-
-
 
     toolboxActions: {
         async "Refetch Badges"() {

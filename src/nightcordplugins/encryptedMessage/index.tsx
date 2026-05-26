@@ -1,14 +1,14 @@
 /*
- * Equicord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
+import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
 import definePlugin from "@utils/types";
-import { Menu, Parser, Toasts, useState, useEffect, React } from "@webpack/common";
 import type { Message } from "@vencord/discord-types";
+import { Menu, Parser, React,Toasts, useEffect, useState } from "@webpack/common";
 
 const MARKER = "\u200B\u200C\u200D";
 

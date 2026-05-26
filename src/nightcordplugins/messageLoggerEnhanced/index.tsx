@@ -389,7 +389,7 @@ export default definePlugin({
 
         // Cache pour éviter de recréer les classes de messages à chaque appel (très fréquent au scroll)
         const combinedMessageCache = new Map<string, any>();
-        
+
         MessageStore.getMessage = (channelId: string, messageId: string) => {
             const MLMessage = idb.cachedMessages.get(messageId);
             if (!MLMessage)
@@ -414,10 +414,10 @@ export default definePlugin({
                     ...(latestMessage ?? {}),
                 }
             });
-            
+
             // On ne met en cache que si on a un résultat stable
             combinedMessageCache.set(messageId, combined);
-            
+
             // Nettoyage périodique du cache pour éviter les fuites mémoire
             if (combinedMessageCache.size > 1000) {
                 const firstKey = combinedMessageCache.keys().next().value;

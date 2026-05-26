@@ -1,27 +1,19 @@
 /*
- * Nightcord — MultiInstance plugin
- *
- * Clic gauche sur un account :
- *   → Si token disponible : choisit directement "New window" ou "Split" via le ctx menu
- *   → Si pas de token : switch rapide uniquement
- *
- * Clic droit sur un account : context menu (New window | Split screen | Close)
- *
- * La logique est :
- *   - Clic GAUCHE avec token → ouvre le context menu (même que clic droit)
- *     (on ne fait PLUS location.reload sur clic gauche si le account a un token)
- *   - Clic GAUCHE sans token → switch rapide classique
- *   - Clic DROIT avec token → context menu
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
+
+import "./styles.css";
 
 import { addHeaderBarButton, HeaderBarButton, removeHeaderBarButton } from "@api/HeaderBar";
 import { DataStore } from "@api/index";
-import definePlugin, { PluginNative } from "@utils/types";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
+import definePlugin, { PluginNative } from "@utils/types";
 import { findByProps } from "@webpack";
 import { Forms, React, ReactDOM, UserStore } from "@webpack/common";
+
 import { t } from "../autoTranslateNightcord";
-import "./styles.css";
 
 const Native = VencordNative.pluginHelpers.MultiInstance as PluginNative<typeof import("./native")>;
 const STORE_KEY = "TokenImporter_accounts";
@@ -416,7 +408,7 @@ function MultiInstanceModal({ rootProps }: { rootProps: any; }) {
                     ) : allAccounts.map(acc => {
                         const isOpen = openInstances.includes(acc.id);
                         const tagText = acc.hasToken
-                            ? (acc.isNative ? "🔗 Discord Account" : `🔑 Token`)
+                            ? (acc.isNative ? "🔗 Discord Account" : "🔑 Token")
                             : t("Switch only");
                         return (
                             <div

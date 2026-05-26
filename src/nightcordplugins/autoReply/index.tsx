@@ -1,6 +1,6 @@
 /*
- * Equicord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -13,8 +13,6 @@ import { React, RestAPI, useState } from "@webpack/common";
 // ── Stores ─────────────────────────────────────────────────────────────────────
 
 const UserStore = findStoreLazy("UserStore");
-
-
 
 // ── Settings ───────────────────────────────────────────────────────────────────
 
@@ -97,7 +95,6 @@ const settings = definePluginSettings({
 
 const lastReplied = new Map<string, number>();
 let sequentialIndex = 0;
-
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 

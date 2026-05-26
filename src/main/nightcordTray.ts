@@ -1,8 +1,6 @@
 /*
- * Nightcord — System Tray (injection mode)
- * Creates a Nightcord system tray icon when injected into Discord Desktop.
- * Discord doesn't create a tray icon when injected — we create our own.
- *
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 

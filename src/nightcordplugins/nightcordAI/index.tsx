@@ -1,19 +1,21 @@
 /*
- * Equicord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { openModal, ModalRoot, ModalContent, ModalCloseButton } from "@utils/modal";
-import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { definePluginSettings } from "@api/Settings";
-import definePlugin, { OptionType } from "@utils/types";
-import { showApiKeyWarning } from "@utils/apiKeyWarning";
-import { DataStore } from "@api/index";
-import { React, useState, useEffect, useRef, UserStore, RelationshipStore, ChannelStore, RestAPI, FluxDispatcher, Menu } from "@webpack/common";
-import { groqChat, getGroqKey, setGroqKey, getCurrentModel, registerSettingsFallback } from "./groqManager";
-import { findByPropsLazy } from "@webpack";
 import "./styles.css";
+
+import { findGroupChildrenByChildId } from "@api/ContextMenu";
+import { DataStore } from "@api/index";
+import { definePluginSettings } from "@api/Settings";
+import { showApiKeyWarning } from "@utils/apiKeyWarning";
+import { ModalCloseButton,ModalRoot, openModal } from "@utils/modal";
+import definePlugin, { OptionType } from "@utils/types";
+import { findByPropsLazy } from "@webpack";
+import { ChannelStore, FluxDispatcher, Menu,React, RelationshipStore, RestAPI, useEffect, useRef, UserStore, useState } from "@webpack/common";
+
+import { getGroqKey, groqChat,setGroqKey } from "./groqManager";
 
 // ── Settings ───────────────────────────────────────────────────────────────────
 
@@ -243,12 +245,11 @@ async function executeAction(action: DiscordAction): Promise<string> {
                 return action.reply ?? `📞 Call in progress to **${friend.username}**...`;
             case "join_voice":
                 joinVoiceChannel(action.target ?? "");
-                return action.reply ?? `🔊 Voice channel joined!`;
+                return action.reply ?? "🔊 Voice channel joined!";
             default: return "Unknown action.";
         }
     } catch (e: any) { return `❌ ${e.message}`; }
 }
-
 
 // Convertit un message en format API Groq
 function toApiMsg(m: Message) {

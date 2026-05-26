@@ -1,14 +1,14 @@
 /*
- * Nightcord — SelfDestruct Plugin
- * Envoie des messages qui se suppriment automatiquement après un délai configurable.
- * Timer rouge visible uniquement par l'utilisateur.
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { definePluginSettings } from "@api/Settings";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { React, FluxDispatcher } from "@webpack/common";
+import { React } from "@webpack/common";
 
 // ── Discord internals ──────────────────────────────────────────────────────────
 

@@ -5,7 +5,7 @@
  */
 
 import { Button, Flex, Heading, Paragraph } from "@Nightcord/types/components";
-import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize } from "@Nightcord/types/utils";
+import { ModalContent, ModalFooter, ModalHeader, ModalRoot } from "@Nightcord/types/utils";
 import { React } from "@Nightcord/types/webpack/common";
 
 type ModalProps = { transitionState: any; onClose(): void; };

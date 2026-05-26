@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+ 
 // eslint-disable-next-line import/no-unresolved, import/extensions
 const VoiceEngine = require('./discord_voice.node');
 const fs = require('fs');

@@ -1,10 +1,16 @@
-import definePlugin, { OptionType } from "@utils/types";
-import { definePluginSettings } from "@api/Settings";
-import { UserStore, ChannelStore, RestAPI, FluxDispatcher, React } from "@webpack/common";
-import { DataStore } from "@api/index";
-import { groqChat, getGroqKey } from "../nightcordAI/groqManager";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { ChatBarButton } from "@api/ChatButtons";
+import { definePluginSettings } from "@api/Settings";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
+import { ChannelStore, React,RestAPI, UserStore } from "@webpack/common";
+
+import { getGroqKey,groqChat } from "../nightcordAI/groqManager";
 
 const MessageStore = findByPropsLazy("getMessages");
 
@@ -87,7 +93,7 @@ const settings = definePluginSettings({
 const DS_STYLE_KEY = "auto-responder-global-style";
 
 let lastMessageId = "";
-let cachedGlobalStyle = "";
+const cachedGlobalStyle = "";
 
 async function handleMessage(message: any) {
     if (!settings.store.isActive) return;

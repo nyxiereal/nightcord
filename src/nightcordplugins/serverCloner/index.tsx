@@ -1,18 +1,18 @@
 /*
- * Equicord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import "./styles.css";
 
-import { definePluginSettings } from "@api/Settings";
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
-import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
+import { definePluginSettings } from "@api/Settings";
 import { FormSwitch } from "@components/FormSwitch";
+import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { React, useState, useRef, useMemo, GuildStore, RestAPI, UserStore, Toasts, Select, Button, Menu } from "@webpack/common";
 import { findStoreLazy } from "@webpack";
+import { Button, GuildStore, Menu,React, RestAPI, Select, Toasts, useMemo, useRef, UserStore, useState } from "@webpack/common";
 import { Forms } from "@webpack/common";
 const F = Forms as any;
 
@@ -165,7 +165,7 @@ async function cloneServer(
             const iconUrl = `https://cdn.discordapp.com/icons/${sourceId}/${sourceGuild.icon}.png?size=512`;
             const resp = await fetch(iconUrl);
             const blob = await resp.blob();
-            const base64 = await new Promise<string>((resolve) => {
+            const base64 = await new Promise<string>(resolve => {
                 const reader = new FileReader();
                 reader.onloadend = () => resolve(reader.result as string);
                 reader.readAsDataURL(blob);
@@ -238,7 +238,7 @@ async function cloneServer(
             if (positions.length) {
                 try {
                     await apiCall("patch", `/guilds/${targetId}/roles`, positions);
-                    log({ text: `  Role positions reordered automatically`, type: "info" });
+                    log({ text: "  Role positions reordered automatically", type: "info" });
                 } catch (e: any) {
                     log({ text: `  Failed to patch positions: ${e?.message || e}`, type: "warn" });
                 }
@@ -327,7 +327,7 @@ async function cloneServer(
                     const emojiUrl = `https://cdn.discordapp.com/emojis/${emoji.id}.${ext}?size=128`;
                     const resp = await fetch(emojiUrl);
                     const blob = await resp.blob();
-                    const base64 = await new Promise<string>((resolve) => {
+                    const base64 = await new Promise<string>(resolve => {
                         const reader = new FileReader();
                         reader.onloadend = () => resolve(reader.result as string);
                         reader.readAsDataURL(blob);
@@ -355,7 +355,7 @@ async function cloneServer(
             let embedCount = 0;
             for (const [sourceChId, targetChId] of channelMapping.entries()) {
                 if (_cancelled) break;
-                
+
                 // Skip categories (they don't have messages)
                 const sourceCh = sourceChannels.find(c => c.id === sourceChId);
                 if (sourceCh?.type === 4) continue;

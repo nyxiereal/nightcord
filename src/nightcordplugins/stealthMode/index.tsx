@@ -1,10 +1,7 @@
 /*
- * Nightcord - StealthMode plugin
- * Cache tous les boutons de plugins (barre du haut, zone texte, zone utilisateur)
- * Toggle : Ctrl+Shift+H ou bouton dans Nightcord Settings.
- *
- * NOTE: La logique réelle (keydown, DOM hide, toggle) est dans src/api/HeaderBar.tsx
- * et s'exécute au chargement du module webpack, AVANT le démarrage des plugins.
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import { isStealthModeEnabled, syncStealthBodyClass, toggleStealthMode } from "@api/HeaderBar";

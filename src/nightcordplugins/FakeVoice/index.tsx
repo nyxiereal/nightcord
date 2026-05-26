@@ -1,8 +1,14 @@
-import { findByProps } from "@webpack";
-import definePlugin from "@utils/types";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { ApplicationCommandInputType, sendBotMessage } from "@api/Commands";
 import { UserAreaButton, UserAreaRenderProps } from "@api/UserArea";
-import { React, ContextMenuApi, Menu } from "@webpack/common";
+import definePlugin from "@utils/types";
+import { findByProps } from "@webpack";
+import { ContextMenuApi, Menu,React } from "@webpack/common";
 
 let isGhostActive = false;
 let configFakeMute = true;

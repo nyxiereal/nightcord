@@ -1,4 +1,10 @@
-﻿import "./updater";
+﻿/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import "./updater";
 import "./ipcPlugins";
 import "./settings";
 
@@ -72,13 +78,13 @@ ipcMain.handle(IpcEvents.WORLD_BOMB_TYPE, async (event, text: string, delay: num
     const safeDelay = Math.max(0, Math.min(10000, delay));
 
     const psLines = [
-        `Add-Type -AssemblyName System.WindowsForms;`,
-        `$text = $args[0];`,
-        `$delay = [int]$args[1];`,
-        `foreach ($char in $text.ToCharArray()) {`,
-        `  [System.Windows.Forms.SendKeys]::SendWait($char);`,
-        `  if ($delay -gt 0) { Start-Sleep -m $delay; }`,
-        `}`,
+        "Add-Type -AssemblyName System.WindowsForms;",
+        "$text = $args[0];",
+        "$delay = [int]$args[1];",
+        "foreach ($char in $text.ToCharArray()) {",
+        "  [System.Windows.Forms.SendKeys]::SendWait($char);",
+        "  if ($delay -gt 0) { Start-Sleep -m $delay; }",
+        "}",
     ];
     const psScript = psLines.join("\r\n");
     const tempDir = mkdtempSync(join(tmpdir(), "nightcord-wb-"));
@@ -91,7 +97,7 @@ ipcMain.handle(IpcEvents.WORLD_BOMB_TYPE, async (event, text: string, delay: num
         ]);
         await new Promise<void>((resolve, reject) => {
             child.on("error", reject);
-            child.on("exit", (code) => {
+            child.on("exit", code => {
                 if (code === 0) resolve();
                 else reject(new Error(`PowerShell exit code ${code}`));
             });
@@ -117,7 +123,7 @@ function runPowershellScript(psScript: string): Promise<void> {
                 "-File", tempFile
             ]);
             child.on("error", reject);
-            child.on("exit", (code) => {
+            child.on("exit", code => {
                 try { unlinkSync(tempFile); } catch {}
                 try { rmdirSync(tempDir); } catch {}
                 if (code === 0) resolve();
@@ -142,7 +148,7 @@ ipcMain.handle(IpcEvents.WORLD_BOMB_PRESS_ENTER, () => {
 });
 
 ipcMain.handle(IpcEvents.WORLD_BOMB_PRESS_BACKSPACE, () => {
-    return runPowershellScript(`Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait('{BACKSPACE}')`);
+    return runPowershellScript("Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait('{BACKSPACE}')");
 });
 
 ipcMain.handle(IpcEvents.WORLD_BOMB_CLICK, (event, x: number, y: number) => {
@@ -186,42 +192,42 @@ ipcMain.handle(IpcEvents.WORLD_BOMB_SEQUENCE, async (
     const baseMs = Math.round((minMs + maxMs) / 2);
 
     const lines: string[] = [
-        `$ErrorActionPreference = "Stop"`,
-        `try {`,
-        `  Add-Type -AssemblyName System.Windows.Forms`,
-        `  Add-Type -AssemblyName System.Drawing`,
-        `  $sig = '[DllImport("user32.dll")] public static extern void mouse_event(uint a, uint b, uint c, uint d, uint e); [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h); [DllImport("user32.dll")] public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);'`,
-        `  Add-Type -MemberDefinition $sig -Name WinAPI -Namespace NC -ErrorAction SilentlyContinue`,
-        `  $handle = [IntPtr]::Zero`,
+        "$ErrorActionPreference = \"Stop\"",
+        "try {",
+        "  Add-Type -AssemblyName System.Windows.Forms",
+        "  Add-Type -AssemblyName System.Drawing",
+        "  $sig = '[DllImport(\"user32.dll\")] public static extern void mouse_event(uint a, uint b, uint c, uint d, uint e); [DllImport(\"user32.dll\")] public static extern bool SetForegroundWindow(IntPtr h); [DllImport(\"user32.dll\")] public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);'",
+        "  Add-Type -MemberDefinition $sig -Name WinAPI -Namespace NC -ErrorAction SilentlyContinue",
+        "  $handle = [IntPtr]::Zero",
         `  $proc = Get-Process -Id ${process.pid} -ErrorAction SilentlyContinue`,
-        `  if ($proc) { $handle = $proc.MainWindowHandle }`,
-        `  if ($handle -ne [IntPtr]::Zero) {`,
-        `    [NC.WinAPI]::SetForegroundWindow($handle) | Out-Null`,
-        `    Start-Sleep -Milliseconds 10`,
-        `  }`,
+        "  if ($proc) { $handle = $proc.MainWindowHandle }",
+        "  if ($handle -ne [IntPtr]::Zero) {",
+        "    [NC.WinAPI]::SetForegroundWindow($handle) | Out-Null",
+        "    Start-Sleep -Milliseconds 10",
+        "  }",
         `  [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point(${centerX}, ${centerY})`,
-        `  [NC.WinAPI]::mouse_event(2, 0, 0, 0, 0)`,
-        `  [NC.WinAPI]::mouse_event(4, 0, 0, 0, 0)`,
-        `  Start-Sleep -Milliseconds 10`,
+        "  [NC.WinAPI]::mouse_event(2, 0, 0, 0, 0)",
+        "  [NC.WinAPI]::mouse_event(4, 0, 0, 0, 0)",
+        "  Start-Sleep -Milliseconds 10",
     ];
 
     for (const char of word) {
         if (safeHumanChance > 0) {
             lines.push(`  if ((Get-Random -Minimum 1 -Maximum 101) -le ${safeHumanChance}) {`);
-            lines.push(`    [System.Windows.Forms.SendKeys]::SendWait('x')`);
+            lines.push("    [System.Windows.Forms.SendKeys]::SendWait('x')");
             lines.push(`    Start-Sleep -Milliseconds ${baseMs}`);
-            lines.push(`    [System.Windows.Forms.SendKeys]::SendWait('{BACKSPACE}')`);
+            lines.push("    [System.Windows.Forms.SendKeys]::SendWait('{BACKSPACE}')");
             lines.push(`    Start-Sleep -Milliseconds ${baseMs}`);
-            lines.push(`  }`);
+            lines.push("  }");
         }
         lines.push(`  [System.Windows.Forms.SendKeys]::SendWait('${char.replace(/'/g, "''")}')`);
         lines.push(`  Start-Sleep -Milliseconds (Get-Random -Minimum ${minMs} -Maximum ${maxMs})`);
     }
 
-    lines.push(`  [NC.WinAPI]::keybd_event(0x0D, 0x1C, 0, [UIntPtr]::Zero)`);
-    lines.push(`  Start-Sleep -Milliseconds 20`);
-    lines.push(`  [NC.WinAPI]::keybd_event(0x0D, 0x1C, 2, [UIntPtr]::Zero)`);
-    lines.push(`} catch { exit 1 }`);
+    lines.push("  [NC.WinAPI]::keybd_event(0x0D, 0x1C, 0, [UIntPtr]::Zero)");
+    lines.push("  Start-Sleep -Milliseconds 20");
+    lines.push("  [NC.WinAPI]::keybd_event(0x0D, 0x1C, 2, [UIntPtr]::Zero)");
+    lines.push("} catch { exit 1 }");
 
     const psScript = lines.join("\r\n");
     const tempDir = mkdtempSync(join(tmpdir(), "nightcord-wbs-"));
@@ -234,7 +240,7 @@ ipcMain.handle(IpcEvents.WORLD_BOMB_SEQUENCE, async (
                 "-File", tempFile
             ]);
             child.on("error", reject);
-            child.on("exit", (code) => {
+            child.on("exit", code => {
                 if (code === 0) resolve();
                 else reject(new Error(`PowerShell exit code ${code}`));
             });
@@ -246,7 +252,7 @@ ipcMain.handle(IpcEvents.WORLD_BOMB_SEQUENCE, async (
 });
 
 let globalHookProcess: any = null;
-ipcMain.handle(IpcEvents.KEYBOARD_SOUNDS_START_GLOBAL, (event) => {
+ipcMain.handle(IpcEvents.KEYBOARD_SOUNDS_START_GLOBAL, event => {
     if (globalHookProcess) return;
 
     const { spawn } = require("child_process");
@@ -325,7 +331,7 @@ ${code}
     try {
         writeFileSync(tempFile, "\uFEFF" + psScript, "utf8");
         globalHookProcess = spawn("powershell", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-WindowStyle", "Hidden", "-File", tempFile]);
-        
+
         globalHookProcess.stdout.on("data", (data: Buffer) => {
             const lines = data.toString().trim().split(/\r?\n/);
             for (const line of lines) {
@@ -644,7 +650,7 @@ body { margin: 0; padding: 16px; background: transparent; overflow: hidden; font
         streamProofWindow.loadURL("data:text/html;charset=utf-8," + encodeURIComponent(htmlContent));
     }
 
-    streamProofWindow.on('closed', () => {
+    streamProofWindow.on("closed", () => {
         streamProofWindow = null;
     });
 });
@@ -978,7 +984,7 @@ ipcMain.handle(IpcEvents.INSTALL_VB_CABLE, async () => {
                 `Expand-Archive -Path "${tmpZip}" -DestinationPath "${tmpDir}" -Force;`
             ]);
             child.on("error", reject);
-            child.on("exit", (code) => {
+            child.on("exit", code => {
                 if (code === 0) resolve();
                 else reject(new Error(`Download/Extract failed with code ${code}`));
             });
@@ -1006,7 +1012,7 @@ ipcMain.handle(IpcEvents.INSTALL_VB_CABLE, async () => {
                 `Start-Process -FilePath "${installerPath}" -ArgumentList "/SILENT" -Verb RunAs -Wait;`
             ]);
             child.on("error", reject);
-            child.on("exit", (code) => {
+            child.on("exit", code => {
                 if (code === 0) resolve();
                 else reject(new Error(`Install failed with code ${code}`));
             });

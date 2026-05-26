@@ -55,7 +55,6 @@ function renderListOption(listType: ListType, IdType: idKeys, props: any) {
 
 function renderOpenLogs(idType: idKeys, props: any) {
     const id = idFunctions[idType](props);
-    // TODO: rewrite logs modal to accept arrays
     if (!id || Array.isArray(id)) return null;
 
     return (

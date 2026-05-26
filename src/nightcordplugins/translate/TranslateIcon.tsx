@@ -21,7 +21,7 @@ import { Paragraph } from "@components/Paragraph";
 import { classes } from "@utils/misc";
 import { openModal } from "@utils/modal";
 import { IconComponent } from "@utils/types";
-import { Alerts, Tooltip, useEffect, useState, Button } from "@webpack/common";
+import { Alerts, Button,Tooltip, useEffect, useState } from "@webpack/common";
 
 import { settings } from "./settings";
 import { TranslateModal } from "./TranslateModal";

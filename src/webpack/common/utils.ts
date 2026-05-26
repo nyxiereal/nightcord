@@ -223,7 +223,7 @@ export const ChannelActions = findByPropsLazy("selectChannel", "preload");
 // ─── Re-exports for compatibility with Equicord/Vencord plugins ────────────────
 
 // Modal API (from @utils/modal)
-export { openModal, openModalLazy, closeModal, closeAllModals, ModalRoot as Modal, ModalRoot, ModalHeader, ModalContent, ModalFooter, ModalCloseButton } from "@utils/modal";
+export { closeAllModals, closeModal, ModalRoot as Modal, ModalCloseButton,ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal, openModalLazy } from "@utils/modal";
 
 // Actions
 export const VoiceActions = findByPropsLazy("toggleSelfMute", "setChannel");

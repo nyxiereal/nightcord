@@ -1,6 +1,6 @@
 /*
- * Equicord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -8,7 +8,7 @@ import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatc
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByProps } from "@webpack";
-import { Button, ChannelStore, GuildChannelStore, GuildMemberStore, GuildRoleStore, GuildStore, Menu, React, Select, TextArea } from "@webpack/common";
+import { Button, GuildChannelStore, GuildMemberStore, GuildRoleStore, GuildStore, Menu, React, Select, TextArea } from "@webpack/common";
 
 // ─── Global State ──────────────────────────────────────────────────────────────
 // isEnabled is the SINGLE source of truth — read from DataStore at start()
@@ -438,7 +438,7 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: any) 
                 children[i] = React.cloneElement(group, { children: filtered });
             }
         }
-        const username = user.username;
+        const { username } = user;
         const allRoles = getGuildRoles(guildId);
         const memberRoleIds = getMemberRoleIds(guildId, user.id);
 

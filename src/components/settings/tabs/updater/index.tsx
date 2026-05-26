@@ -1,24 +1,23 @@
 /*
- * Nightcord — Onglet Updater dans les Settings
- * Affiche la version actuelle, vérifie GitHub et permet de mettre à jour.
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Button } from "@components/Button";
+import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
+import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings";
-import { Margins } from "@utils/margins";
-import { changes, checkForUpdates, getRepo, isOutdated, rebuild, update, UpdateLogger } from "@utils/updater";
-import { React, useState } from "@webpack/common";
-
-import { Button } from "@components/Button";
-import { Card } from "@components/Card";
-import { Flex } from "@components/Flex";
 import { Span } from "@components/Span";
-import { Toasts, Alerts } from "@webpack/common";
-
+import { Margins } from "@utils/margins";
 import { relaunch } from "@utils/native";
+import { changes, checkForUpdates, rebuild, update, UpdateLogger } from "@utils/updater";
+import { React, useState } from "@webpack/common";
+import { Toasts } from "@webpack/common";
 
 // Version locale depuis package.json (injectée au build)
 declare const VERSION: string;
@@ -72,7 +71,7 @@ function UpdaterTab() {
             // Update & build triggers our new ASAR overwrite
             await update();
             await rebuild();
-            
+
             Toasts.show({
                 message: "Update successful! Restarting...",
                 id: Toasts.genId(),

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findByCodeLazy, findByPropsLazy, waitFor } from "../webpack";
+import { findByCodeLazy, findByPropsLazy } from "../webpack";
 
 export const React: typeof import("react") = findByPropsLazy("useState", "useEffect");
 
@@ -32,8 +32,6 @@ export const {
     useImperativeHandle
 } = React;
 
-
 export const ReactDOM: typeof import("react-dom") = findByPropsLazy("createPortal");
 // 299 is an error code used in createRoot and createPortal
 export const createRoot: typeof import("react-dom/client").createRoot = findByCodeLazy("(299));", ".onRecoverableError");
-

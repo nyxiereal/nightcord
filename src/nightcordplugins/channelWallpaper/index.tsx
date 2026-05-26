@@ -1,16 +1,16 @@
 /*
- * Nightcord — ChannelWallpaper Plugin
- * Custom wallpaper per channel/DM (image, gif, looping video).
- * Right click on user/channel → Set/modify/delete wallpaper.
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
-import definePlugin, { OptionType } from "@utils/types";
 import { Devs } from "@utils/constants";
-import { findStoreLazy, findByPropsLazy } from "@webpack";
-import { ChannelStore, Menu, React, Toasts, showToast, SelectedChannelStore, FluxDispatcher, RelationshipStore, UserStore } from "@webpack/common";
 import { sendMessage } from "@utils/discord";
+import definePlugin, { OptionType } from "@utils/types";
+import { findByPropsLazy } from "@webpack";
+import { ChannelStore, Menu, React, RelationshipStore, SelectedChannelStore, showToast, Toasts, UserStore } from "@webpack/common";
 
 const MessageActions = findByPropsLazy("deleteMessage");
 const SYNC_PREFIX = "\u200b\u200c\u200bNC_WP:";
@@ -372,7 +372,7 @@ function initVPSSync() {
     if (!settings.store.vpsUrl) return;
     try {
         vpsSocket = new WebSocket(settings.store.vpsUrl);
-        vpsSocket.onmessage = (e) => {
+        vpsSocket.onmessage = e => {
             try {
                 const data = JSON.parse(e.data);
                 if (data.type === "UPDATE" && data.channelId) {

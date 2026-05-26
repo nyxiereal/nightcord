@@ -1,7 +1,13 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import definePlugin from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { UserStore, PermissionStore, PermissionsBits, ChannelStore } from "@webpack/common";
-import { RestAPI, Constants } from "@webpack/common";
+import { ChannelStore,PermissionsBits, PermissionStore, UserStore } from "@webpack/common";
+import { Constants,RestAPI } from "@webpack/common";
 
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
 const VoiceActions = findByPropsLazy("toggleSelfMute");

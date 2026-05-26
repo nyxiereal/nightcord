@@ -1,11 +1,11 @@
 /*
- * Nightcord, a Discord client mod
- * Copyright (c) 2025 Nightcord contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { BaseButton, BaseText } from "@Nightcord/types/components";
-import { React, useState, useRef } from "react";
+import { BaseText } from "@Nightcord/types/components";
+import { React, useRef,useState } from "react";
 
 import { cl } from "./Settings";
 
@@ -13,7 +13,7 @@ function detectSource(json: any): "equicord" | "vencord" | "nightcord" | "unknow
     // Heuristiques basées sur les clés présentes dans le JSON
     if (!json || typeof json !== "object") return "unknown";
 
-    const settings = json.settings;
+    const { settings } = json;
     if (!settings) return "unknown";
 
     const plugins = settings.plugins || {};
@@ -33,7 +33,7 @@ function cleanForNightcord(json: any): any {
     if (!json || typeof json !== "object") return json;
 
     const cleaned = JSON.parse(JSON.stringify(json));
-    const settings = cleaned.settings;
+    const { settings } = cleaned;
 
     if (!settings?.plugins) return cleaned;
 

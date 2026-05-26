@@ -9,6 +9,7 @@ import { Logger } from "@utils/Logger";
 import { findComponentByCodeLazy } from "@webpack";
 import { useEffect, useState } from "@webpack/common";
 import type { ComponentType, MouseEventHandler, ReactNode } from "react";
+
 import { addStealthListener, isStealthModeEnabled, removeStealthListener } from "./HeaderBar";
 
 const PanelButton = findComponentByCodeLazy("tooltipPositionKey", "positionKeyStemOverride") as ComponentType<UserAreaButtonProps>;

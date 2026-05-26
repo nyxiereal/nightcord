@@ -1,15 +1,16 @@
 /*
- * Nightcord – DMBomb plugin
- * Sends a message to ALL server members or a specific role via DM.
- * Right click on server icon -> "DM Bomb"
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Menu, React, RestAPI, Select, Toasts, showToast, useEffect, useRef, useState } from "@webpack/common";
-import { GuildMemberStore, GuildRoleStore, GuildStore, UserStore } from "@webpack/common";
+import "./styles.css";
+
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import "./styles.css";
+import { Menu, React, RestAPI, Select, showToast, Toasts, useEffect, useRef, useState } from "@webpack/common";
+import { GuildMemberStore, GuildRoleStore, GuildStore, UserStore } from "@webpack/common";
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 

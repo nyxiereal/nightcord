@@ -1,7 +1,7 @@
 /*
- * Nightcord — git updater désactivé
- * Le build standalone utilise http.ts à la place.
- * Ce fichier est un stub vide pour éviter toute erreur si chargé par erreur.
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 // Intentionnellement vide — Nightcord ne supporte pas le mode git updater.

@@ -22,7 +22,7 @@ import { ChannelStore, SelectedChannelStore, UserStore } from "@webpack/common";
 
 import { settings } from "../index";
 import { LoggedMessageJSON } from "../types";
-import { findLastIndex, getGuildIdByChannel } from "./misc";
+import { getGuildIdByChannel } from "./misc";
 
 export * from "./cleanUp";
 export * from "./misc";
@@ -33,16 +33,16 @@ interface Id { id: string, time: number; message?: LoggedMessageJSON; }
 export const DISCORD_EPOCH = 14200704e5;
 export function reAddDeletedMessages(messages: LoggedMessageJSON[], deletedMessages: LoggedMessageJSON[], channelStart: boolean, channelEnd: boolean) {
     if (!messages.length || !deletedMessages?.length) return;
-    
+
     const existingIds = new Set(messages.map(m => m.id));
     const allMessages: Id[] = messages.map(m => ({ id: m.id, time: (parseInt(m.id) / 4194304) + DISCORD_EPOCH, message: m }));
-    
+
     for (const record of deletedMessages) {
         if (record && !existingIds.has(record.id)) {
-            allMessages.push({ 
-                id: record.id, 
-                time: (parseInt(record.id) / 4194304) + DISCORD_EPOCH, 
-                message: record 
+            allMessages.push({
+                id: record.id,
+                time: (parseInt(record.id) / 4194304) + DISCORD_EPOCH,
+                message: record
             });
         }
     }

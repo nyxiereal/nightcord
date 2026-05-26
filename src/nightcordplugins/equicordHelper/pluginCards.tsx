@@ -17,7 +17,7 @@ import { TooltipContainer } from "@components/TooltipContainer";
 import { EQUIBOT_USER_ID, NIGHTCORD_BOT_USER_ID } from "@utils/constants";
 import { isEquicordGuild, isEquicordSupport } from "@utils/misc";
 import { Message } from "@vencord/discord-types";
-import { Button, showToast, Tooltip, useMemo } from "@webpack/common";
+import { showToast, Tooltip, useMemo } from "@webpack/common";
 import { JSX } from "react";
 
 import plugins, { ExcludedPlugins } from "~plugins";

@@ -72,8 +72,6 @@ export const enum IpcEvents {
     CHECK_VB_CABLE = "NightcordCheckVBCable",
     INSTALL_VB_CABLE = "NightcordInstallVBCable",
 
-
-
     // Relaunch de l'app Electron
     RELAUNCH_APP = "NightcordRelaunchApp",
 

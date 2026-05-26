@@ -1,17 +1,16 @@
 /*
- * Equicord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import "./styles.css";
 
 import { DataStore } from "@api/index";
-import definePlugin, { PluginNative } from "@utils/types";
 import { UserAreaButton, UserAreaButtonFactory, UserAreaRenderProps } from "@api/UserArea";
-import { findByProps, findByPropsLazy, findStoreLazy } from "@webpack";
-import { React, ReactDOM, Toasts, useState, useEffect, useRef } from "@webpack/common";
-
+import definePlugin, { PluginNative } from "@utils/types";
+import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { React, ReactDOM, Toasts, useEffect, useRef,useState } from "@webpack/common";
 
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
 const ChannelStore = findStoreLazy("ChannelStore");
@@ -277,7 +276,7 @@ function Dropdown({ icon, label, value, options, onChange }: {
     return (
         <div className="gc-dropdown-wrap">
             <div className="gc-dropdown-label">{icon}<span>{label}</span></div>
-            <button ref={btnRef} className={`gc-dropdown-btn ${open ? "gc-dropdown-btn--open" : ""}`} onClick={(e) => openDropdown(e)}>
+            <button ref={btnRef} className={`gc-dropdown-btn ${open ? "gc-dropdown-btn--open" : ""}`} onClick={e => openDropdown(e)}>
                 <div className="gc-dropdown-selected">
                     {selected?.avatar !== undefined && (selected.avatar
                         ? <img src={avatarUrl(selected.userId!, selected.avatar)} className="gc-dropdown-avatar" alt="" />
@@ -382,7 +381,7 @@ function GhostPopover({ onClose, anchorRect }: { onClose: () => void; anchorRect
         if (!anchorRect) return { position: "fixed", bottom: 80, left: 8, zIndex: 2147483647 };
         const PW = 320, PH = 560;
         const margin = 8;
-        let left = anchorRect.left;
+        let { left } = anchorRect;
         let top = anchorRect.top - PH - 8;
         if (top < margin) top = anchorRect.bottom + 8;
         if (top + PH > window.innerHeight - margin) top = window.innerHeight - PH - margin;
@@ -392,7 +391,7 @@ function GhostPopover({ onClose, anchorRect }: { onClose: () => void; anchorRect
     }, [anchorRect]);
 
     useEffect(() => {
-        getAllSavedAccounts().then((v) => { setAccounts(v); savedAccounts = v; });
+        getAllSavedAccounts().then(v => { setAccounts(v); savedAccounts = v; });
 
         // Auto-follow activé par défaut (true si pas encore de valeur dans le DataStore)
         DataStore.get(DS_KEY_AUTO_FOLLOW).then((v: boolean | null) => {
@@ -704,7 +703,7 @@ const GhostUserAreaButton: UserAreaButtonFactory = ({ iconForeground, hideToolti
             }
             notify();
             // Parallel connection
-            await Promise.all(targets.map(async (acc) => {
+            await Promise.all(targets.map(async acc => {
                 ghostStates.set(acc.userId, { active: false, connecting: true, error: null });
                 notify();
                 try {

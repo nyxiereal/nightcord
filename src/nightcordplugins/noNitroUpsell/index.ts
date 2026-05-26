@@ -1,7 +1,7 @@
 /*
- * Nightcord — NoNitroUpsell
- * Blocks Nitro upsell popups by intercepting Flux actions before they render.
- * Does NOT use MutationObserver or direct DOM removal to avoid React crashes.
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import definePlugin from "@utils/types";

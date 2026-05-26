@@ -1,16 +1,15 @@
 /*
- * Equicord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
-import { DataStore } from "@api/index";
 import { Modals, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { RelationshipType } from "@vencord/discord-types/enums";
 import { findByProps } from "@webpack";
-import { ChannelStore, Constants, GuildMemberStore, Menu, React, RelationshipStore, FluxDispatcher, RestAPI, Toasts, UserStore, UserUtils } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, GuildMemberStore, Menu, React, RelationshipStore, Toasts, UserStore, UserUtils } from "@webpack/common";
 
 const DS_KEY = "FakeFriends_state";
 

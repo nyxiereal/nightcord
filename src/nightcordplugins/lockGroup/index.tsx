@@ -5,8 +5,8 @@
  */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { definePluginSettings } from "@api/Settings";
 import { showNotification } from "@api/Notifications";
+import { definePluginSettings } from "@api/Settings";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, Menu, RestAPI, UserStore } from "@webpack/common";
 import { Channel } from "discord-types/general";
@@ -53,7 +53,7 @@ function interceptAddMember(originalMethod: any) {
                 const currentUserId = UserStore.getCurrentUser()?.id;
 
                 if (channel && channel.type === 3 && channel.ownerId === currentUserId) {
-                    debugLog(`\u2705 Propri\u00e9taire autoris\u00e9 \u00e0 ajouter des membres`);
+                    debugLog("\u2705 Propri\u00e9taire autoris\u00e9 \u00e0 ajouter des membres");
                     return originalMethod.apply(this, args);
                 }
 
@@ -212,7 +212,7 @@ export default definePlugin({
                         const addedByUserId = message.author?.id;
 
                         if (addedByUserId === currentUserId) {
-                            debugLog(`\u2705 Ajout fait par le propri\u00e9taire - Autoris\u00e9`);
+                            debugLog("\u2705 Ajout fait par le propri\u00e9taire - Autoris\u00e9");
                             return;
                         }
 

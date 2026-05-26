@@ -1,6 +1,7 @@
 /*
- * LoginWithToken — bouton "Se connecter avec un token" sur la page login
- * Utilise le même système de connexion que TokenImporter
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import { EquicordDevs } from "@utils/constants";

@@ -1,6 +1,6 @@
 /*
- * Equicord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -33,7 +33,6 @@ function applyLimiter(data: StreamData) {
     const UserStore = (window as any).Vencord?.Webpack?.findByStoreName?.("UserStore") || (window as any).Vencord?.Webpack?.common?.UserStore;
     const myId = UserStore?.getCurrentUser?.()?.id;
     if (myId && (data.id === myId || data.id === "default" || data.id === "local")) return;
-
 
     try {
         const ctx = data.audioContext;

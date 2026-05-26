@@ -1,20 +1,17 @@
 /*
- * Nightcord — Backpack Plugin
- * Allows organizing chat bar buttons in a "backpack"
- * to declutter the input area.
- *
- * Left-click on Backpack → popout with packed buttons (work normally)
- * Right-click on Backpack → context menu to pack/unpack buttons
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import "./styles.css";
 
+import { BackpackedButtons, ChatBarButton, ChatBarButtonFactory, ChatBarButtonMap, ChatBarProps, notifyBackpackChange } from "@api/ChatButtons";
 import { DataStore } from "@api/index";
-import { ChatBarButton, ChatBarButtonFactory, ChatBarButtonMap, ChatBarProps, BackpackedButtons, notifyBackpackChange } from "@api/ChatButtons";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { React, useState, useEffect, useRef, Popout, Tooltip, Menu, ContextMenuApi } from "@webpack/common";
-import ErrorBoundary from "@components/ErrorBoundary";
+import { ContextMenuApi,Menu, Popout, React, Tooltip, useEffect, useRef, useState } from "@webpack/common";
 
 const STORE_KEY = "Backpack_packedButtons";
 
@@ -104,9 +101,9 @@ function BackpackPopout({ chatBarProps, closePopout }: { chatBarProps: ChatBarPr
                             className="backpack-item-horizontal"
                             {...tooltipProps}
                             style={{ overflow: "visible" }}
-                            onClick={(e) => {
+                            onClick={e => {
                                 // Désactivation de la fermeture automatique pour permettre d'activer plusieurs plugins
-                                // closePopout(); 
+                                // closePopout();
                             }}
                         >
                             <ErrorBoundary noop>
@@ -156,7 +153,7 @@ function BackpackContextMenu() {
 
 // ─── Chat Bar Button ──────────────────────────────────────────────────────────
 
-const BackpackChatBarButton: ChatBarButtonFactory = (props) => {
+const BackpackChatBarButton: ChatBarButtonFactory = props => {
     const { isMainChat, ...chatBarProps } = props;
     const [isOpen, setIsOpen] = useState(false);
     const [count, setCount] = useState(BackpackedButtons.size);

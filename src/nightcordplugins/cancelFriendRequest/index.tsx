@@ -1,6 +1,6 @@
 /*
- * Equicord, a Discord client mod
- * Copyright (c) 2024 Nightcord contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -57,7 +57,7 @@ function scan(root: Document | Element = document) {
     // aria-label="Outgoing Friend Request" — invariant quelle que soit la langue UI
     root.querySelectorAll<HTMLElement>('button[aria-label="Outgoing Friend Request"]').forEach(btn => {
         // Trouver le userId via le container du profil
-        const profileContainer = btn.closest("[class*='profileButtons']") 
+        const profileContainer = btn.closest("[class*='profileButtons']")
             ?? btn.closest("[class*='profileHeader']")
             ?? btn.closest("[class*='inner']");
         if (!profileContainer) return;

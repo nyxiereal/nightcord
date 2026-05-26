@@ -5,18 +5,18 @@
  */
 
 import { showNotice } from "@api/Notices";
-import { hasAnyVisibleSettings, isPluginEnabled, pluginRequiresRestart, startDependenciesRecursive, startPlugin, stopPlugin } from "@api/PluginManager";
+import { isPluginEnabled, pluginRequiresRestart, startDependenciesRecursive, startPlugin, stopPlugin } from "@api/PluginManager";
 import { CogWheel, InfoIcon } from "@components/Icons";
 import { AddonCard } from "@components/settings/AddonCard";
 import { classNameFactory } from "@utils/css";
 import { Logger } from "@utils/Logger";
+import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize,openModal } from "@utils/modal";
 import { OptionType, Plugin } from "@utils/types";
-import { openModal, ModalRoot, ModalHeader, ModalCloseButton, ModalContent, ModalSize } from "@utils/modal";
 import { React, showToast, Text, Toasts } from "@webpack/common";
 import { Settings } from "Vencord";
 
-import { openPluginModal } from "./PluginModal";
 import { TUTORIAL_CACHE } from "./components/Common";
+import { openPluginModal } from "./PluginModal";
 
 const logger = new Logger("PluginCard");
 const cl = classNameFactory("vc-plugins-");

@@ -1,14 +1,13 @@
 /*
- * Nightcord — AntiNickname
- * Automatically resets any nickname forcefully set on you by anyone.
- * Tries both possible endpoints to cover all cases.
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, RestAPI, Toasts, UserStore, showToast } from "@webpack/common";
+import { RestAPI, showToast,Toasts, UserStore } from "@webpack/common";
 
 const settings = definePluginSettings({
     showToast: {

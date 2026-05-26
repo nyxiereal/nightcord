@@ -6,7 +6,7 @@
 
 import { IpcEvents } from "@shared/IpcEvents";
 import { gitHashShort } from "@shared/vencordUserAgent";
-import { BrowserWindow, ipcMain, Menu, MenuItemConstructorOptions, shell } from "electron";
+import { BrowserWindow, ipcMain, MenuItemConstructorOptions, shell } from "electron";
 import aboutHtml from "file://about.html?minify";
 
 import { SETTINGS_DIR, THEMES_DIR } from "./utils/constants";

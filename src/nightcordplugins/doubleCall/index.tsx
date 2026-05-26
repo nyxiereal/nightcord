@@ -1,14 +1,14 @@
 /*
- * Nightcord – DoubleCall plugin
- * Rejoins deux canaux vocaux simultanément avec ton propre account.
- * Recopié depuis le build fonctionnel (compiled output).
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import "./styles.css";
 
-import { createAudioPlayer, AudioPlayerInterface } from "@api/AudioPlayer";
-import definePlugin, { PluginNative } from "@utils/types";
+import { AudioPlayerInterface,createAudioPlayer } from "@api/AudioPlayer";
 import { UserAreaButton, UserAreaButtonFactory, UserAreaRenderProps } from "@api/UserArea";
+import definePlugin, { PluginNative } from "@utils/types";
 import { findStoreLazy, waitFor } from "@webpack";
 import { React, useState } from "@webpack/common";
 
@@ -158,4 +158,3 @@ export default definePlugin({
         }
     },
 });
-

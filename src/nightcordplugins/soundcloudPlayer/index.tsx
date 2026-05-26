@@ -1,24 +1,17 @@
 /*
- * Equicord, a modification for Discord's desktop app
- * Copyright (c) 2024 Vendicated and contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
- *
- * SoundCloud / SoundCord Player Plugin
- * Ported from soundcloud_player.h (GTK/C)
- *
- * Client ID is fetched via native.ts (Electron net.fetch, main process)
- * to bypass Discord CSP which blocks fetch() from the renderer.
  */
 
 import "./styles.css";
 
-import { DataStore } from "@api/index";
 import { HeaderBarButton } from "@api/HeaderBar";
+import { DataStore } from "@api/index";
 import { EquicordDevs } from "@utils/constants";
-import { openModal, ModalRoot, ModalSize } from "@utils/modal";
+import { ModalRoot, ModalSize,openModal } from "@utils/modal";
 import definePlugin, { IconComponent, PluginNative } from "@utils/types";
-import { React, useState, useEffect, useRef, Select, MediaEngineStore } from "@webpack/common";
-import { t, useTranslation } from "../../plugins/autoTranslateNightcord";
+import { MediaEngineStore,React, Select, useEffect, useRef, useState } from "@webpack/common";
 
 // ─── Native (IPC → main process) ─────────────────────────────────────────────
 
@@ -254,7 +247,7 @@ async function initPlayer() {
         playerState.clientId = id;
         playerState.status = "Search for a title or an artist...";
     } else {
-        playerState.status = `❌ Impossible to obtain client_id. Check your connection.`;
+        playerState.status = "❌ Impossible to obtain client_id. Check your connection.";
     }
     playerState.favorites = await loadFavorites();
     playerState.notify();
@@ -264,11 +257,11 @@ async function getDiscordRealOutputDeviceId(): Promise<string> {
     try {
         const discordId = MediaEngineStore.getOutputDeviceId();
         if (!discordId || discordId === "default") return "";
-        
+
         const devs = MediaEngineStore.getOutputDevices();
         const selected = devs[discordId];
         if (!selected || !selected.name) return "";
-        
+
         let webDevs = await navigator.mediaDevices.enumerateDevices();
         if (webDevs.some(d => d.kind === "audiooutput" && !d.label)) {
             try {
@@ -277,13 +270,13 @@ async function getDiscordRealOutputDeviceId(): Promise<string> {
                 webDevs = await navigator.mediaDevices.enumerateDevices();
             } catch { }
         }
-        
-        const match = webDevs.find(d => 
-            d.kind === "audiooutput" && 
-            d.label && 
+
+        const match = webDevs.find(d =>
+            d.kind === "audiooutput" &&
+            d.label &&
             (d.label.includes(selected.name) || selected.name.includes(d.label) || d.label.toLowerCase() === selected.name.toLowerCase())
         );
-        
+
         if (match) {
             console.log(`[SoundCord] Mapped Discord output device "${selected.name}" to WebAudio deviceId "${match.deviceId}"`);
             return match.deviceId;
@@ -296,7 +289,7 @@ async function getDiscordRealOutputDeviceId(): Promise<string> {
 
 async function playerPlayTrack(track: ScTrack, fromFavIdx = -1) {
     const s = playerState;
-    if (!s.clientId) { s.status = `❌ Missing client_id`; s.notify(); return; }
+    if (!s.clientId) { s.status = "❌ Missing client_id"; s.notify(); return; }
     if (s.audio) { s.audio.pause(); s.audio.src = ""; s.audio = null; }
 
     s.status = "⏳ Refreshing track...";
@@ -321,8 +314,8 @@ async function playerPlayTrack(track: ScTrack, fromFavIdx = -1) {
         }
 
         // Error handling for the audio element itself
-        audio.addEventListener("error", (e) => {
-            const error = audio.error;
+        audio.addEventListener("error", e => {
+            const { error } = audio;
             console.error("[SoundCord] HTML5 Audio Error:", error?.code, error?.message);
             if (error?.code === 4 || error?.code === 3) {
                 s.status = "❌ Stream error : No supported source found (Region lock?)";
@@ -373,7 +366,7 @@ async function playerPlayTrack(track: ScTrack, fromFavIdx = -1) {
         audio.addEventListener("error", () => { s.status = "❌ Audio playback error"; s.isPlaying = false; s.notify(); });
         await audio.play();
         s.isPlaying = true;
-        s.status = `▶ Now playing…`;
+        s.status = "▶ Now playing…";
         s.notify();
     } catch (e: any) {
         s.status = `❌ Stream error : ${e.message}`;
@@ -492,7 +485,6 @@ function SoundCloudModal({ onClose }: { onClose: () => void; }) {
         load();
     }, []);
 
-
     async function applyOutputDevice(deviceId: string) {
         setSelectedOutput(deviceId);
         await DataStore.set(SC_OUTPUT_KEY, deviceId);
@@ -519,8 +511,8 @@ function SoundCloudModal({ onClose }: { onClose: () => void; }) {
             if (!isRetry && (e.message?.includes("401") || e.message?.includes("403"))) {
                 p.status = "Refreshing connection..."; p.notify();
                 const newId = await refreshClientId();
-                if (newId) { 
-                    p.clientId = newId; 
+                if (newId) {
+                    p.clientId = newId;
                     return doSearch(true);
                 }
                 else { p.status = "Connection impossible"; p.notify(); }

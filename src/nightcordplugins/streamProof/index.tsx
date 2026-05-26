@@ -1,10 +1,17 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import "./styles.css";
+
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { definePluginSettings } from "@api/Settings";
-import definePlugin, { OptionType } from "@utils/types";
 import { EquicordDevs } from "@utils/constants";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { React, useState, useStateFromStores, UserStore } from "@webpack/common";
-import "./styles.css";
+import { React, UserStore,useState, useStateFromStores } from "@webpack/common";
 
 const StreamStore = findByPropsLazy("getActiveStreamForUser", "getAllActiveStreams");
 const RTCConnectionStore = findByPropsLazy("getMediaSessionId");
@@ -74,7 +81,7 @@ function enableStreamProof() {
         clickHandler = (e: MouseEvent) => {
             const target = e.target as HTMLElement | null;
             if (!target) return;
-            const targetElement = target.closest(`[class*="messageContent_"], [class*="markup_"], [class*="imageWrapper_"], [class*="embedWrapper_"], [id^="message-accessories-"] article, [class*="attachment_"], [class*="video_"], [class*="voiceMessage_"], [class*="wrapperPaused_"], [class*="wrapperPlaying_"], [class*="audioAttachment_"], [class*="fileUpload_"], [class*="wrapperAudio_"], [class*="mediaBarInteraction_"], [class*="newMosaicStyle_"], [class*="stickerAsset_"], [class*="channel_"][class*="interactive_"]`);
+            const targetElement = target.closest("[class*=\"messageContent_\"], [class*=\"markup_\"], [class*=\"imageWrapper_\"], [class*=\"embedWrapper_\"], [id^=\"message-accessories-\"] article, [class*=\"attachment_\"], [class*=\"video_\"], [class*=\"voiceMessage_\"], [class*=\"wrapperPaused_\"], [class*=\"wrapperPlaying_\"], [class*=\"audioAttachment_\"], [class*=\"fileUpload_\"], [class*=\"wrapperAudio_\"], [class*=\"mediaBarInteraction_\"], [class*=\"newMosaicStyle_\"], [class*=\"stickerAsset_\"], [class*=\"channel_\"][class*=\"interactive_\"]");
             if (targetElement && !targetElement.classList.contains("stream-proof-revealed")) {
                 targetElement.classList.add("stream-proof-revealed");
                 e.preventDefault();

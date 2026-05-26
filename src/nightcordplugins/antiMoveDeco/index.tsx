@@ -1,7 +1,13 @@
-import definePlugin from "@utils/types";
-import { FluxDispatcher, React, UserStore } from "@webpack/common";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { UserAreaButton } from "@api/UserArea";
-import { findByProps, findByPropsLazy } from "@webpack";
+import definePlugin from "@utils/types";
+import { findByPropsLazy } from "@webpack";
+import { FluxDispatcher, React, UserStore } from "@webpack/common";
 
 // Modules Webpack
 const ChannelActions = findByPropsLazy("selectVoiceChannel", "disconnect");

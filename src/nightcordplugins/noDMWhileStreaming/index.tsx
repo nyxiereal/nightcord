@@ -1,10 +1,16 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByProps, findByPropsLazy } from "@webpack";
-import { FluxDispatcher, UserStore, ChannelStore, ReadStateStore, useStateFromStores, React } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, React,UserStore, useStateFromStores } from "@webpack/common";
 
 const StreamStore = findByPropsLazy("getActiveStreamForUser", "getAllActiveStreams");
 const RTCConnectionStore = findByPropsLazy("getMediaSessionId");

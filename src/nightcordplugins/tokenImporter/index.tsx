@@ -1,19 +1,21 @@
 /*
- * Equicord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./styles.css";
+
 import { addHeaderBarButton, HeaderBarButton, removeHeaderBarButton } from "@api/HeaderBar";
+import { DataStore } from "@api/index";
+import { ModalCloseButton,ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import { PluginNative } from "@utils/types";
 import definePlugin from "@utils/types";
-import { t } from "../autoTranslateNightcord";
-import { openModal, ModalRoot, ModalHeader, ModalContent, ModalCloseButton } from "@utils/modal";
-import { React, useState, useRef, useEffect, useCallback, useMemo } from "@webpack/common";
-import { Forms } from "@webpack/common";
-import { DataStore } from "@api/index";
 import { findByProps } from "@webpack";
-import "./styles.css";
+import { React, useCallback, useEffect, useMemo,useRef, useState } from "@webpack/common";
+import { Forms } from "@webpack/common";
+
+import { t } from "../autoTranslateNightcord";
 
 const Native = VencordNative.pluginHelpers.TokenImporter as PluginNative<typeof import("./native")>;
 const STORE_KEY = "TokenImporter_accounts";

@@ -1,15 +1,16 @@
 /*
- * Equicord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { definePluginSettings } from "@api/Settings";
+import { showApiKeyWarning } from "@utils/apiKeyWarning";
 import definePlugin, { OptionType } from "@utils/types";
 import { React } from "@webpack/common";
-import { groqChat, getGroqKey } from "../nightcordAI/groqManager";
-import { showApiKeyWarning } from "@utils/apiKeyWarning";
+
+import { getGroqKey,groqChat } from "../nightcordAI/groqManager";
 
 // ── Settings ───────────────────────────────────────────────────────────────────
 
@@ -97,14 +98,12 @@ async function correctText(text: string): Promise<string> {
                 return text;
             }
         }
-        return corrected.replace(/^"(.*)"$/, '$1').trim(); // Nettoie les guillemets éventuels
+        return corrected.replace(/^"(.*)"$/, "$1").trim(); // Nettoie les guillemets éventuels
     } catch (e: any) {
         console.warn("[AutoCorrect] Error correction:", e.message);
         return text; // En cas d'error, envoyer le texte original
     }
 }
-
-
 
 // ── Chat Bar Button ────────────────────────────────────────────────────────────
 
@@ -182,4 +181,3 @@ export default definePlugin({
         }
     },
 });
-

@@ -189,7 +189,7 @@ export default definePlugin({
             find: 'className:"fullScreen"',
             replacement: {
                 match: /onClick:(\i)/,
-                replace: 'onClick:(e)=>{$1(e);}'
+                replace: "onClick:(e)=>{$1(e);}"
             }
         },
 

@@ -1,5 +1,7 @@
 /*
- * Nightcord — Injection CSS globale pour masquer les boutons natifs Discord
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import { Devs } from "@utils/constants";

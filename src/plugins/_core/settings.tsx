@@ -5,27 +5,24 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { BackupRestoreIcon, LogIcon, MainSettingsIcon, PaintbrushIcon, PatchHelperIcon, PluginsIcon, UpdaterIcon, MagnifyingGlassIcon } from "@components/Icons";
-import IconsTab from "@nightcordplugins/iconViewer/components/IconsTab";
-
+import { BackupRestoreIcon, LogIcon, MagnifyingGlassIcon,MainSettingsIcon, PaintbrushIcon, PatchHelperIcon, PluginsIcon, UpdaterIcon } from "@components/Icons";
 import {
     BackupAndRestoreTab,
     ChangelogTab,
     PatchHelperTab,
     PluginsTab,
-
     ThemesTab,
     UpdaterTab,
     VencordTab,
 } from "@components/settings";
 import { CreateThemeTab } from "@nightcordplugins/createTheme/components/CreateThemeTab";
 import { PencilSparkleIcon } from "@nightcordplugins/createTheme/components/PencilSparkleIcon";
+import IconsTab from "@nightcordplugins/iconViewer/components/IconsTab";
 import { gitHashShort } from "@shared/vencordUserAgent";
 import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
 import definePlugin, { IconProps, OptionType } from "@utils/types";
-import Plugins from "~plugins";
-import { findByPropsLazy, waitFor } from "@webpack";
+import { waitFor } from "@webpack";
 import { React } from "@webpack/common";
 import type { ComponentType, PropsWithChildren, ReactNode } from "react";
 

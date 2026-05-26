@@ -20,11 +20,10 @@ import { onceDefined } from "@shared/onceDefined";
 import electron, { app, BrowserWindowConstructorOptions, Menu, session } from "electron";
 import { existsSync as fsExistsSync, statSync as fsStatSync } from "original-fs";
 import { dirname, join } from "path";
-import { registerMediaPermissionsForSession } from "../nightcord/main/mediaPermissions";
 
+import { registerMediaPermissionsForSession } from "../nightcord/main/mediaPermissions";
 // Note: nightcordTray removed — Nightcord injects silently into Discord,
 // Discord manages its own tray icon (same behaviour as Equicord).
-
 import { RendererSettings } from "./settings";
 import { patchTrayMenu } from "./trayMenu";
 import { IS_VANILLA } from "./utils/constants";
@@ -155,9 +154,9 @@ if (!IS_VANILLA) {
                                 isFakeFullScreen = true;
                                 originalBounds = this.getBounds();
                                 isMaximizedBefore = this.isMaximized();
-                                
+
                                 const display = electron.screen.getDisplayMatching(originalBounds).bounds;
-                                
+
                                 this.setResizable(false);
                                 this.setBounds(display);
                                 this.setAlwaysOnTop(true, "screen-saver");

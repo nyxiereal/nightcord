@@ -86,7 +86,7 @@ const commonDefines = {
 const buildPack = (folder: string, id: string, name: string, generic: string, customDefines?: Record<string, string>) => {
     const defines: Record<string, string> = {};
     const base = `${baseUrl}${encodeURIComponent(folder)}/`;
-    
+
     if (customDefines) {
         Object.entries(customDefines).forEach(([k, v]) => {
             defines[k] = `${base}${v}`;
@@ -94,8 +94,8 @@ const buildPack = (folder: string, id: string, name: string, generic: string, cu
     } else {
         Object.entries(commonDefines).forEach(([k, v]) => {
             let filename = v;
-            if (id === 'banana-split') filename = `banana-l-${(parseInt(k) % 6) + 1}.wav`;
-            if (id === 'mx-speed-silver') filename = `mx-speed-silver-${(parseInt(k) % 6) + 1}.wav`;
+            if (id === "banana-split") filename = `banana-l-${(parseInt(k) % 6) + 1}.wav`;
+            if (id === "mx-speed-silver") filename = `mx-speed-silver-${(parseInt(k) % 6) + 1}.wav`;
             defines[k] = `${base}${filename}`;
         });
     }

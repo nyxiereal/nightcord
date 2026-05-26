@@ -1,11 +1,7 @@
 /*
- * Nightcord — FakeDM plugin
- *
- * Fix position: uses getBoundingClientRect() on the real DOM button
- * Fix IDs: unique snowflake guaranteed by counter
- * Persistence: fakes survive Discord restarts via localStorage
- * Random seconds: timestamps never fall on :00
- * Group DM support: works in group channels (type 3) with member selector
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import "./styles.css";
@@ -13,7 +9,7 @@ import "./styles.css";
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import definePlugin from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { FluxDispatcher, React, SelectedChannelStore, UserStore, ReactDOM } from "@webpack/common";
+import { FluxDispatcher, React, ReactDOM,SelectedChannelStore, UserStore } from "@webpack/common";
 
 // ─── Unique IDs ─────────────────────────────────────────────────────────────
 let _idCounter = 0;
@@ -495,7 +491,7 @@ function FakeDMPanel({ onClose, btnRect }: { onClose(): void; btnRect: DOMRect; 
                                 ref={textareaRef}
                                 className="fdm-textarea"
                                 rows={2}
-                                placeholder={`Message… (↵ send)`}
+                                placeholder={"Message… (↵ send)"}
                                 value={text}
                                 onChange={e => setText(e.target.value)}
                                 onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}

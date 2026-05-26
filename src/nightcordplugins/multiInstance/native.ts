@@ -1,16 +1,13 @@
 /*
- * Nightcord — MultiInstance native.ts
- *
- * Injection du token : méthode robuste via setPreloads de la session.
- * On crée un script de préchargement TEMPORAIRE dans un fichier que
- * l'on passe à ses.setPreloads([...]) — ce script s'exécute dans
- * le main world AVANT tout JS de la page, garantissant que
- * localStorage.token est défini avant que Discord le lise.
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { BrowserWindow, screen, session, nativeImage, app, ipcMain } from "electron";
-import { writeFileSync, mkdirSync, existsSync } from "fs";
+import { app, BrowserWindow, ipcMain,screen, session } from "electron";
+import { existsSync,mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
+
 import { registerMediaPermissionsForSession } from "../../nightcord/main/mediaPermissions";
 
 const openWindows = new Map<string, BrowserWindow>();
@@ -32,28 +29,28 @@ function registerWindowControlIpc(win: BrowserWindow): () => void {
     const wc = win.webContents as any; // webContents.ipc existe depuis Electron 20
 
     // Canaux Discord natif (découverts dans _core_extracted/bundle.js)
-    const CLOSE     = "DISCORD_WINDOW_CLOSE";
-    const MINIMIZE  = "DISCORD_WINDOW_MINIMIZE";
-    const MAXIMIZE  = "DISCORD_WINDOW_MAXIMIZE";
-    const RESTORE   = "DISCORD_WINDOW_RESTORE";
+    const CLOSE = "DISCORD_WINDOW_CLOSE";
+    const MINIMIZE = "DISCORD_WINDOW_MINIMIZE";
+    const MAXIMIZE = "DISCORD_WINDOW_MAXIMIZE";
+    const RESTORE = "DISCORD_WINDOW_RESTORE";
     const FULLSCREEN = "DISCORD_WINDOW_TOGGLE_FULLSCREEN";
 
     // webContents.ipc.handle est prioritaire sur ipcMain.handle pour ce sender
-    const handleClose     = () => { if (!win.isDestroyed()) win.close(); };
-    const handleMinimize  = () => { if (!win.isDestroyed()) win.minimize(); };
-    const handleMaximize  = () => {
+    const handleClose = () => { if (!win.isDestroyed()) win.close(); };
+    const handleMinimize = () => { if (!win.isDestroyed()) win.minimize(); };
+    const handleMaximize = () => {
         if (win.isDestroyed()) return;
         if (win.isMaximized()) win.unmaximize(); else win.maximize();
     };
-    const handleRestore   = () => { if (!win.isDestroyed()) win.restore(); };
+    const handleRestore = () => { if (!win.isDestroyed()) win.restore(); };
     const handleFullscreen = () => { if (!win.isDestroyed()) win.setFullScreen(!win.isFullScreen()); };
 
     try {
         // webContents.ipc.handle (Electron 20+)
-        wc.ipc.handle(CLOSE,      handleClose);
-        wc.ipc.handle(MINIMIZE,   handleMinimize);
-        wc.ipc.handle(MAXIMIZE,   handleMaximize);
-        wc.ipc.handle(RESTORE,    handleRestore);
+        wc.ipc.handle(CLOSE, handleClose);
+        wc.ipc.handle(MINIMIZE, handleMinimize);
+        wc.ipc.handle(MAXIMIZE, handleMaximize);
+        wc.ipc.handle(RESTORE, handleRestore);
         wc.ipc.handle(FULLSCREEN, handleFullscreen);
     } catch {
         // Fallback : ipcMain.handle global avec filtre sur sender
@@ -72,10 +69,10 @@ function registerWindowControlIpc(win: BrowserWindow): () => void {
         ipcMain.removeHandler(MAXIMIZE);
         ipcMain.removeHandler(RESTORE);
         // NE PAS enregistrer FULLSCREEN - gere globalement par le patcher
-        ipcMain.handle(CLOSE,     guardedHandle(handleClose));
-        ipcMain.handle(MINIMIZE,  guardedHandle(handleMinimize));
-        ipcMain.handle(MAXIMIZE,  guardedHandle(handleMaximize));
-        ipcMain.handle(RESTORE,   guardedHandle(handleRestore));
+        ipcMain.handle(CLOSE, guardedHandle(handleClose));
+        ipcMain.handle(MINIMIZE, guardedHandle(handleMinimize));
+        ipcMain.handle(MAXIMIZE, guardedHandle(handleMaximize));
+        ipcMain.handle(RESTORE, guardedHandle(handleRestore));
         return () => {
             ipcMain.removeHandler(CLOSE);
             ipcMain.removeHandler(MINIMIZE);
@@ -153,7 +150,7 @@ let iconCounter = 1;
 function getDetachedIconDir(): string {
     // En production : {app_dir}/multi-instance-icons/
     // En dev : Desktop/lolll/
-    const exeDir = join(process.execPath, "..")
+    const exeDir = join(process.execPath, "..");
     const prodDir = join(exeDir, "multi-instance-icons");
     if (existsSync(prodDir)) return prodDir;
     // Fallback dev : Desktop/lolll

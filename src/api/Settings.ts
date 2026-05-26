@@ -188,7 +188,6 @@ if (!IS_REPORTER && settings.plugins && plugins) {
     }
 }
 
-
 export const SettingsStore = new SettingsStoreClass(settings, {
     readOnly: true,
     getDefaultValue({

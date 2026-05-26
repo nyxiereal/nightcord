@@ -6,14 +6,10 @@
 
 import "./styles.css";
 
-import { MagnifyingGlassIcon } from "@components/Icons";
-import SettingsPlugin from "@plugins/_core/settings";
 import { Devs } from "@utils/constants";
-import { removeFromArray } from "@utils/misc";
 import definePlugin, { StartAt } from "@utils/types";
 import { SettingsRouter } from "@webpack/common";
 
-import IconsTab from "./components/IconsTab";
 import { SettingsAbout } from "./components/Modals";
 
 export default definePlugin({

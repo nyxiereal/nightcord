@@ -1,20 +1,21 @@
 ﻿/*
- * Nightcord – Mass DM plugin
- * Sends a message to all your friends with anti-rate-limit delay.
- * Top bar button + /massdm command.
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./styles.css";
+
 import { HeaderBarButton } from "@api/HeaderBar";
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
-import definePlugin from "@utils/types";
-import { findStoreLazy } from "@webpack";
-import { Checkbox, React, RestAPI, ScrollerThin, useEffect, useRef, useState, Select, IconUtils } from "@webpack/common";
-import { t } from "../autoTranslateNightcord";
 import { Button } from "@components/Button";
 import { HeadingPrimary, HeadingSecondary } from "@components/Heading";
 import { Margins } from "@utils/margins";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
+import definePlugin from "@utils/types";
+import { findStoreLazy } from "@webpack";
+import { React, RestAPI, ScrollerThin, Select,useEffect, useRef, useState } from "@webpack/common";
 
-import "./styles.css";
+import { t } from "../autoTranslateNightcord";
 
 const RelationshipStore = findStoreLazy("RelationshipStore");
 const UserStore = findStoreLazy("UserStore");

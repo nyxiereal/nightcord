@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Card } from "@components/Card";
 import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
-import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalProps } from "@utils/modal";
-import { React, Button } from "@webpack/common";
-import { Margins } from "@utils/margins";
-import { Card } from "@components/Card";
 import { copyWithToast } from "@utils/discord";
+import { Margins } from "@utils/margins";
+import { ModalContent, ModalFooter, ModalHeader, ModalProps,ModalRoot } from "@utils/modal";
+import { Button,React } from "@webpack/common";
 
 interface ContributeModalProps {
     onClose: () => void;

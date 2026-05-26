@@ -1,6 +1,6 @@
 /*
- * Vesktop, a desktop app aiming to give you a snappier Discord Experience
- * Copyright (c) 2023 Vendicated and Vencord contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -132,7 +132,7 @@ export function makeLinksOpenExternally(win: BrowserWindow) {
 
     win.webContents.on("did-create-window", (childWin, { frameName, options, url }: any) => {
         let isPopout = frameName.startsWith("DISCORD_");
-        
+
         if (!isPopout) {
             if (options && (options as any).isDiscordPopout) {
                 isPopout = true;

@@ -1,6 +1,6 @@
 /*
- * Vesktop, a desktop app aiming to give you a snappier Discord Experience
- * Copyright (c) 2025 Vendicated and Vesktop contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -122,7 +122,7 @@ export async function spoofGnu(window: BrowserWindow) {
                 try {
                     window.webContents.debugger.attach("1.3");
                 } catch (err) {
-                    console.warn(`Debugger attach warning:`, err);
+                    console.warn("Debugger attach warning:", err);
                 }
             }
 

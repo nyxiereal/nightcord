@@ -1,18 +1,14 @@
 /*
- * Equicord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
-*/
+ */
 
 import "./styles.css";
 
-import { HeaderBarButton } from "@api/HeaderBar";
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Popout, useRef, useState } from "@webpack/common";
-
-import { renderPopout } from "./menu";
 
 export const settings = definePluginSettings({
     showPluginMenu: {

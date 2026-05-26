@@ -6,30 +6,31 @@
 
 import "./VencordTab.css";
 
+import { isStealthModeEnabled, toggleStealthMode } from "@api/HeaderBar";
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { plugins } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
 import { Button } from "@components/Button";
+import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
 import { Flex } from "@components/Flex";
 import { FormSwitch } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
-import { FolderIcon, LogIcon, PaintbrushIcon, RestartIcon, OwnerCrownIcon, WebsiteIcon, OpenExternalIcon, PlanetIcon, HeartIcon } from "@components/Icons";
+import { HeartIcon,LogIcon, OwnerCrownIcon, PaintbrushIcon, PlanetIcon, RestartIcon } from "@components/Icons";
 import { Notice } from "@components/Notice";
 import { Paragraph } from "@components/Paragraph";
-import { Card } from "@components/Card";
 import { openPluginModal, SettingsTab, wrapTab } from "@components/settings";
 import { QuickAction, QuickActionCard } from "@components/settings/QuickAction";
 import { IS_MAC, IS_WINDOWS } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
-import { relaunch } from "@utils/native";
-import { React, Select, UserStore, NavigationRouter, Avatar } from "@webpack/common";
-import { _notifyStealthChange, isStealthModeEnabled, syncStealthBodyClass, toggleStealthMode } from "@api/HeaderBar";
-import { openNotificationSettingsModal } from "./NotificationSettings";
 import { openModal } from "@utils/modal";
+import { relaunch } from "@utils/native";
+import { Avatar, React, Select, UserStore } from "@webpack/common";
+
 import { ContributeModal } from "../../../../nightcord/renderer/components/ContributeModal";
+import { openNotificationSettingsModal } from "./NotificationSettings";
 
 const cl = classNameFactory("vc-vencord-tab-");
 
@@ -440,5 +441,3 @@ function EquicordSettings() {
 }
 
 export default wrapTab(EquicordSettings, "Nightcord Settings");
-
-

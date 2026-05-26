@@ -12,7 +12,7 @@ import definePlugin, { OptionType } from "@utils/types";
 
 import { FloodPanelButton } from "./components/ChatBarButton";
 
-let enabled = false;
+const enabled = false;
 
 const settings = definePluginSettings({
     defaultDelay: {

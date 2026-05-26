@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Button } from "@components/Button";
 import { Heading } from "@components/Heading";
 import { DEFAULT_COLOR, SWATCHES } from "@nightcordplugins/pinDms/constants";
 import { categoryLen, createCategory, getCategory } from "@nightcordplugins/pinDms/data";
 import { classNameFactory } from "@utils/css";
+import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import { RenderModalProps } from "@vencord/discord-types";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
 import { ColorPicker, TextInput, Toasts, useMemo, useState } from "@webpack/common";
-import { ModalRoot, ModalHeader, ModalContent, ModalFooter, openModalLazy } from "@utils/modal";
-import { Button } from "@components/Button";
 
 interface ColorPickerWithSwatchesProps {
     className?: string;
@@ -116,8 +116,8 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
             </form>
             </ModalContent>
             <ModalFooter>
-                <Button 
-                    onClick={onSave} 
+                <Button
+                    onClick={onSave}
                     disabled={!name}
                 >
                     {categoryId ? "Save" : "Create"}

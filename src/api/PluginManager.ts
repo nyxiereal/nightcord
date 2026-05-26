@@ -31,7 +31,7 @@ import { disableStyle, enableStyle } from "@api/Styles";
 import { Logger } from "@utils/Logger";
 import { onlyOnce } from "@utils/onlyOnce";
 import { canonicalizeFind, canonicalizeReplacement } from "@utils/patches";
-import { DefinedSettings, Patch, Plugin, PluginDef, PluginSettingDef, ReporterTestable, StartAt } from "@utils/types";
+import { Patch, Plugin, PluginDef, ReporterTestable, StartAt } from "@utils/types";
 import { FluxEvents } from "@vencord/discord-types";
 import { FluxDispatcher } from "@webpack/common";
 import { patches } from "@webpack/patcher";
@@ -55,8 +55,6 @@ const subscribedFluxEventsPlugins = new Set<string>();
 export function isPluginEnabled(p: string) {
     const plugin = Plugins[p];
     if (!plugin) return false;
-
-
 
     return (
         plugin.required ||
@@ -289,8 +287,6 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
 
     return true;
 }, p => `startPlugin ${p.name}`);
-
-
 
 export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plugin) {
     const {

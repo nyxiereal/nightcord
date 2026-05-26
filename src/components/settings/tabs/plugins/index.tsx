@@ -44,7 +44,7 @@ import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
 
 import { PluginCard } from "./PluginCard";
 import { openWarningModal } from "./PluginModal";
-import { StockPluginsCard, UserPluginsCard } from "./PluginStatCards";
+import { StockPluginsCard } from "./PluginStatCards";
 import { UIElementsButton } from "./UIElements";
 
 export const cl = classNameFactory("vc-plugins-");
@@ -445,7 +445,7 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
     return (
         <SettingsTab>
             {!premiumOnly && <ReloadRequiredCard required={changes.hasChanges} enabledPlugins={enabledPlugins} openWarningModal={openWarningModal} resetCheckAndDo={resetCheckAndDo} />}
-            
+
             {!premiumOnly && (
                 <div className={cl("stats-container")} style={{ display: "grid", gridTemplateColumns: "1fr" }}>
                     <StockPluginsCard

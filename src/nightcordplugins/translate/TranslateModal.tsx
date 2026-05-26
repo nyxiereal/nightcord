@@ -21,7 +21,8 @@ import { FormSwitch } from "@components/FormSwitch";
 import { HeadingPrimary, HeadingSecondary } from "@components/Heading";
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
-import { React, useMemo, Select } from "@webpack/common";
+import { React, Select,useMemo } from "@webpack/common";
+
 import { settings } from "./settings";
 import { cl, getLanguages } from "./utils";
 
