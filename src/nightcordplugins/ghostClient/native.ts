@@ -40,8 +40,13 @@ function findServerScript(): string | null {
         path.join(__dirname, "..", "..", "ghost-server", "server.js"),
         path.join(__dirname, "..", "..", "..", "ghost-server", "server.js"),
         path.join(__dirname, "..", "..", "..", "..", "ghost-server", "server.js"),
-        // Racine du repo en dev
-        path.join(resPath, "..", "ghost-server", "server.js"),
+    // Racine du repo en dev
+    path.join(resPath, "..", "ghost-server", "server.js"),
+    // Dev: répertoire de travail courant (dev-inject, npm run dev)
+    path.join(process.cwd(), "ghost-server", "server.js"),
+    // Dev: remontée depuis le répertoire du bundle principal
+    path.join(__dirname, "..", "..", "..", "..", "..", "ghost-server", "server.js"),
+    path.join(__dirname, "..", "..", "..", "..", "..", "..", "ghost-server", "server.js"),
     ];
     console.log("[GhostNative] execPath:", process.execPath);
     console.log("[GhostNative] resourcesPath:", resPath);
@@ -76,6 +81,9 @@ function findNode(): string {
         "C:\\Program Files\\nodejs\\node.exe",
         "C:\\Program Files (x86)\\nodejs\\node.exe",
         path.join(process.env.LOCALAPPDATA ?? "", "Programs", "nodejs", "node.exe"),
+        // Dev: cwd + node_modules/.bin ou racine
+        path.join(process.cwd(), "node.exe"),
+        path.join(process.cwd(), "node_modules", ".bin", "node.exe"),
     ];
     for (const c of candidates) {
         if (fs.existsSync(c)) { console.log("[GhostNative] node.exe trouvé:", c); return c; }

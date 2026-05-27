@@ -114,14 +114,29 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
     useEffect(() => () => { stopDictation(); }, []);
 
     async function startDictation() {
-        const apiKey = await getGroqKey();
-        if (!apiKey) {
-            showApiKeyWarning("VoiceDictation");
+        setErrorMsg(null);
+        activeRef.current = true;
+
+        let stream: MediaStream;
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            streamRef.current = stream;
+        } catch (e: any) {
+            const msg = e.name === "NotAllowedError" || e.name === "PermissionDeniedError"
+                ? "Permission micro refusée — vérifiez les permissions dans les paramètres de Discord"
+                : "Mic unavailable: " + e.message;
+            setErrorMsg(msg);
+            activeRef.current = false;
             return;
         }
 
-        setErrorMsg(null);
-        activeRef.current = true;
+        const apiKey = await getGroqKey();
+        if (!apiKey) {
+            stream.getTracks().forEach(t => t.stop());
+            streamRef.current = null;
+            showApiKeyWarning("VoiceDictation");
+            return;
+        }
 
         async function getRealInputDeviceId(discordId: string): Promise<string> {
             if (!discordId || discordId === "default") return "default";
@@ -137,6 +152,8 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
                         targetName = devs[discordId].name;
                     }
                 }
+                
+                const webDevs = await navigator.mediaDevices.enumerateDevices();
                 
                 if (!targetName) return "default";
                 let webDevs = await navigator.mediaDevices.enumerateDevices();
@@ -172,10 +189,19 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
             return "default";
         }
 
-        let stream: MediaStream;
         try {
             const discordDeviceId = MediaEngineStore.getInputDeviceId();
             const realDeviceId = await getRealInputDeviceId(discordDeviceId);
+            
+            if (realDeviceId && realDeviceId !== "default") {
+                try {
+                    const betterStream = await navigator.mediaDevices.getUserMedia({
+                        audio: { deviceId: { exact: realDeviceId } }
+                    });
+                    stream.getTracks().forEach(t => t.stop());
+                    stream = betterStream;
+                    streamRef.current = stream;
+                } catch { }
 
             try {
                 stream = await navigator.mediaDevices.getUserMedia({
@@ -190,14 +216,8 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
                     throw firstErr;
                 }
             }
-            streamRef.current = stream;
-        } catch (e: any) {
-            const msg = e.name === "NotAllowedError" || e.name === "PermissionDeniedError"
-                ? "Permission micro refusée — vérifiez les permissions dans les paramètres de Discord"
-                : "Mic unavailable: " + e.message;
-            setErrorMsg(msg);
-            activeRef.current = false;
-            return;
+        } catch (err) {
+            console.error("[VoiceDictation] Error getting specific device:", err);
         }
 
         const mimeType = ["audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus", "audio/mp4"]
