@@ -127,11 +127,6 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
             if (!discordId || discordId === "default") return "default";
             try {
                 const devs = MediaEngineStore.getInputDevices();
-<<<<<<< HEAD
-                const selected = devs[discordId];
-                if (!selected || !selected.name) return "default";
-
-=======
                 let targetName = "";
                 
                 if (devs && typeof devs === "object") {
@@ -144,8 +139,6 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
                 }
                 
                 if (!targetName) return "default";
-                
->>>>>>> 5ab15b59 (fix bugs)
                 let webDevs = await navigator.mediaDevices.enumerateDevices();
                 if (webDevs.some(d => d.kind === "audioinput" && !d.label)) {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -156,15 +149,8 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
                 let match = webDevs.find(d => d.kind === "audioinput" && d.deviceId === discordId);
 
                 if (!match) {
-<<<<<<< HEAD
-                    const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
-                    const normSelected = normalize(selected.name);
-
-=======
                     const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
                     const normSelected = normalize(targetName);
-                    
->>>>>>> 5ab15b59 (fix bugs)
                     match = webDevs.find(d => {
                         if (d.kind !== "audioinput" || !d.label) return false;
                         const normLabel = normalize(d.label);
