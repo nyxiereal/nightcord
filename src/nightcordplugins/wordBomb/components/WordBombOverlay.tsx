@@ -218,27 +218,7 @@ export function WordBombOverlay() {
                 // VencordNative est exposé via contextBridge sous le nom "VencordNative"
                 // Dans le renderer Electron packagé, il faut passer par window
                 const nc = (window as any).VencordNative ?? (globalThis as any).VencordNative;
-                const cursorPos = await nc?.wordBomb?.getCursorPos?.() || await nc?.worldBomb?.getCursorPos?.();
-                if (cursorPos && typeof cursorPos.x === "number" && typeof cursorPos.y === "number") {
-                    setCalibratedPos(cursorPos);
-                    setSetting("wb_calibPos", JSON.stringify(cursorPos));
-                    setStatus(`✅ Calibré: (${cursorPos.x}, ${cursorPos.y})`);
-                } else {
-                    // Fallback: essayer via ipcRenderer directement
-                    const { ipcRenderer } = (window as any).require?.("electron") ?? {};
-                    if (ipcRenderer) {
-                        const pos = await ipcRenderer.invoke("WorldBombGetCursorPos");
-                        if (pos && typeof pos.x === "number") {
-                            setCalibratedPos(pos);
-                            setSetting("wb_calibPos", JSON.stringify(pos));
-                            setStatus(`✅ Calibré: (${pos.x}, ${pos.y})`);
-                        } else {
-                            setStatus("❌ Position invalide reçue: " + JSON.stringify(pos));
-                        }
-                    } else {
-                        setStatus("❌ getCursorPos indisponible (nc=" + typeof nc + ")");
-                    }
-                }
+                setStatus("⚠️ Calibration supprimée (API native retirée)");
             } catch (err) {
                 setStatus("❌ Erreur calibrage: " + String(err));
             } finally {
@@ -387,7 +367,7 @@ export function WordBombOverlay() {
             setDefinition("");
         }
 
-        const wbNative = (window as any).VencordNative?.wordBomb || (window as any).VencordNative?.worldBomb;
+        const wbNative = (window as any).VencordNative?.wordBomb;
 
         try {
             if (wbNative?.sequence) {

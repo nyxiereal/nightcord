@@ -121,28 +121,5 @@ export default {
         },
     },
 
-    worldBomb: {
-        type: (text: string, delay: number) => invoke(IpcEvents.WORLD_BOMB_TYPE, text, delay),
-        pressEnter: () => invoke(IpcEvents.WORLD_BOMB_PRESS_ENTER),
-        pressBackspace: () => invoke(IpcEvents.WORLD_BOMB_PRESS_BACKSPACE),
-        // Séquence complète en un seul processus PowerShell (clic auto au centre + frappe + enter)
-        // targetX/targetY : position calibrée du clic (-1 = centre de la fenêtre par défaut)
-        sequence: (word: string, lps: number, humanChance: number, targetX: number = -1, targetY: number = -1) =>
-            invoke(IpcEvents.WORLD_BOMB_SEQUENCE, word, lps, humanChance, targetX, targetY),
-        // Ouvre la fenêtre externe Stream Proof
-        openWindow: (lps: number, humanChance: number, safeMode: boolean, theme: string, playMode: string, noSpace: boolean, groqKey: string) => invoke(IpcEvents.WORLD_BOMB_OPEN_WINDOW, lps, humanChance, safeMode, theme, playMode, noSpace, groqKey),
-        // Retourne la position actuelle du curseur (plus utilisé mais gardé au cas où)
-        getCursorPos: (): Promise<{ x: number; y: number; }> => invoke(IpcEvents.WORLD_BOMB_GET_CURSOR_POS),
-    },
 
-    keyboardSounds: {
-        startGlobalHook: () => invoke<void>(IpcEvents.KEYBOARD_SOUNDS_START_GLOBAL),
-        stopGlobalHook: () => invoke<void>(IpcEvents.KEYBOARD_SOUNDS_STOP_GLOBAL),
-        onGlobalKeyDown: (cb: (keyCode: number) => void) => {
-            ipcRenderer.on(IpcEvents.GLOBAL_KEY_DOWN, (_e, keyCode: number) => cb(keyCode));
-        },
-        removeGlobalKeyDownListener: () => {
-            ipcRenderer.removeAllListeners(IpcEvents.GLOBAL_KEY_DOWN);
-        }
-    }
 };
