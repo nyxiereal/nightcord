@@ -8875,6 +8875,52 @@
         "dirName":  "platformSpoofer"
     },
     {
+        "hasPatches":  false,
+        "hasCommands":  false,
+        "enabledByDefault":  true,
+        "required":  false,
+        "isModified":  false,
+        "tags":  [
+
+                 ],
+        "name":  "PrevNames",
+        "description":  "Shows the username history of a user. Right-click -> PrevNames.",
+        "authors":  [
+                        {
+                            "name":  "Nightcord",
+                            "id":  "0"
+                        }
+                    ],
+        "dependencies":  [
+                             "ContextMenuAPI"
+                         ],
+        "filePath":  "src/nightcordplugins/PrevNames",
+        "dirName":  "PrevNames"
+    },
+    {
+        "hasPatches":  false,
+        "hasCommands":  false,
+        "enabledByDefault":  true,
+        "required":  false,
+        "isModified":  false,
+        "tags":  [
+
+                 ],
+        "name":  "PrevNames",
+        "description":  "Shows the username history of a user. Right-click -> PrevNames.",
+        "authors":  [
+                        {
+                            "name":  "Nightcord",
+                            "id":  "0"
+                        }
+                    ],
+        "dependencies":  [
+                             "ContextMenuAPI"
+                         ],
+        "filePath":  "src/nightcordplugins/PrevNames",
+        "dirName":  "PrevNames"
+    },
+    {
         "hasPatches":  true,
         "hasCommands":  false,
         "enabledByDefault":  false,

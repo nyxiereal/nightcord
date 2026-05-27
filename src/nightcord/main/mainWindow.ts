@@ -353,7 +353,12 @@ function buildBrowserWindowOptions(): BrowserWindowConstructorOptions {
             // disable renderer backgrounding to prevent the app from unloading when in the background
             backgroundThrottling: false
         },
-        frame: !noFrame,
+        // FIX 1: quand customTitleBar ou frameless (noFrame=true), utiliser titleBarStyle:"hidden"
+        // sur Windows/Linux. frame:false seul supprime toute zone draggable OS -> fenetre immobile.
+        // titleBarStyle:"hidden" garde la zone de drag native invisible mais fonctionnelle.
+        ...(noFrame && process.platform !== "darwin"
+            ? { frame: false, titleBarStyle: "hidden" }
+            : { frame: !noFrame }),
         autoHideMenuBar: enableMenu,
         ...getWindowBoundsOptions()
     };
@@ -424,11 +429,14 @@ function createMainWindow() {
 
     initWindowBoundsListeners(win);
 
-    win.on("enter-html-full-screen", () => {
-        win.setFullScreen(true);
-    });
+    // FIX 2: on ne force plus setFullScreen(true) sur enter-html-full-screen.
+    // L'ancien code causait un blocage : quand Discord passait une video en plein ecran HTML5,
+    // Electron forcait le fullscreen natif de l'OS -> les utilisateurs ne pouvaient plus
+    // sortir du fullscreen ou redimensionner la fenetre normalement.
+    // On laisse Discord gerer son propre fullscreen HTML sans toucher a la fenetre Electron.
     win.on("leave-html-full-screen", () => {
-        win.setFullScreen(false);
+        // S'assurer que le fullscreen natif est bien quitte si Discord sort du mode HTML FS
+        if (win.isFullScreen()) win.setFullScreen(false);
     });
 
     if (!isDeckGameMode && (Settings.store.tray ?? true) && process.platform !== "darwin")
@@ -499,7 +507,13 @@ export async function createWindows() {
 
         if (!startMinimized) {
             if (splash) mainWin?.show();
-            if (State.store.maximized && !isDeckGameMode) mainWin?.maximize();
+            // FIX 3: on ne maximize que si maximized=true ET windowBounds absent.
+            // L'ancien code maximizait systematiquement si maximized=true, meme quand l'utilisateur
+            // avait redimensionne la fenetre -> toujours bloque en plein ecran au demarrage.
+            const shouldMaximize = State.store.maximized === true
+                && !isDeckGameMode
+                && !State.store.windowBounds;
+            if (shouldMaximize) mainWin?.maximize();
         }
 
         if (isDeckGameMode) {
@@ -510,9 +524,11 @@ export async function createWindows() {
         }
 
         mainWin.once("show", () => {
-            if (State.store.maximized && !mainWin?.isMaximized() && !isDeckGameMode) {
-                mainWin?.maximize();
-            }
+            const shouldMaximize = State.store.maximized === true
+                && !mainWin?.isMaximized()
+                && !isDeckGameMode
+                && !State.store.windowBounds;
+            if (shouldMaximize) mainWin?.maximize();
         });
     });
 

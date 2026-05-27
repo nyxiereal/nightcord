@@ -32,13 +32,40 @@ const settings = definePluginSettings({
     },
 });
 
-// ─── Tick hook — forces a re-render every second ─────────────────────────────
+// ─── Global tick — UN seul setInterval partagé par tous les composants ─────────
+// BUGFIX: l'ancienne implémentation créait un setInterval PAR composant timestamp
+// rendu (50+ messages = 50+ intervals), forçant 50+ re-renders React par seconde
+// → freeze complet de Discord. Un seul interval global notifie tous les abonnés.
+
+const tickListeners = new Set<() => void>();
+let globalTickInterval: ReturnType<typeof setInterval> | null = null;
+
+function startGlobalTick() {
+    if (globalTickInterval !== null) return;
+    globalTickInterval = setInterval(() => {
+        for (const fn of tickListeners) {
+            try { fn(); } catch { }
+        }
+    }, 1000);
+}
+
+function stopGlobalTick() {
+    if (tickListeners.size > 0) return; // still has subscribers
+    if (globalTickInterval !== null) {
+        clearInterval(globalTickInterval);
+        globalTickInterval = null;
+    }
+}
 
 function useSecondTick() {
     const [, tick] = useReducer((n: number) => n + 1, 0);
     useEffect(() => {
-        const id = setInterval(tick, 1000);
-        return () => clearInterval(id);
+        tickListeners.add(tick);
+        startGlobalTick();
+        return () => {
+            tickListeners.delete(tick);
+            stopGlobalTick();
+        };
     }, []);
 }
 
@@ -78,6 +105,15 @@ export default definePlugin({
     settings,
 
     renderTimestamp,
+
+    stop() {
+        // Cleanup global tick on plugin disable
+        tickListeners.clear();
+        if (globalTickInterval !== null) {
+            clearInterval(globalTickInterval);
+            globalTickInterval = null;
+        }
+    },
 
     patches: [
         // ─── Main Timestamp component (cozy + compact messages + hover tooltip) ─

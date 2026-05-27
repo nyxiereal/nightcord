@@ -1,21 +1,4 @@
-/*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
-
+import type { MouseEvent } from "react";
 import { useTimer } from "@utils/react";
 
 import { cl, VoiceMessage } from "..";
@@ -32,12 +15,14 @@ export type VoicePreviewOptions = {
     src?: string;
     waveform: string;
     recording?: boolean;
+    onDownload?: () => void;
 };
 
 export const VoicePreview = ({
     src,
     waveform,
     recording,
+    onDownload,
 }: VoicePreviewOptions) => {
     const durationMs = useTimer({
         deps: [recording]
@@ -46,8 +31,26 @@ export const VoicePreview = ({
     const durationSeconds = recording ? Math.floor(durationMs / 1000) : 0;
     const durationDisplay = Math.floor(durationSeconds / 60) + ":" + (durationSeconds % 60).toString().padStart(2, "0");
 
+    const handleClick = (event: MouseEvent<HTMLDivElement>) => {
+        if (!onDownload) return;
+        const target = event.target as HTMLElement;
+        const link = target.closest('a[href^="blob:"]') as HTMLAnchorElement | null;
+
+        if (link) {
+            event.preventDefault();
+            event.stopPropagation();
+            onDownload();
+        }
+    };
+
     if (src && !recording)
-        return <VoiceMessage key={src} src={src} waveform={waveform} />;
+        return (
+            <div className={cl("preview", "preview-playback")} onClick={handleClick}>
+                <div className={cl("preview-message")}>
+                    <VoiceMessage key={src} src={src} waveform={waveform} />
+                </div>
+            </div>
+        );
 
     return (
         <div className={cl("preview", recording ? "preview-recording" : [])}>

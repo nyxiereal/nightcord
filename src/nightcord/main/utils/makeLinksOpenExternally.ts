@@ -127,10 +127,59 @@ export function makeLinksOpenExternally(win: BrowserWindow) {
         // Drop the static temp page Discord web loads for the connections popout
         if (frameName === "authorize" && searchParams.get("loading") === "true") return { action: "deny" };
 
+        // Allow captcha popups to open inside Electron (hCaptcha / reCaptcha)
+        // Discord opens them via window.open() — they must stay in-process or the
+        // captcha iframe can never communicate back to Discord.
+        if (
+            hostname.includes("hcaptcha.com") ||
+            hostname.includes("recaptcha.net") ||
+            hostname.includes("google.com") && pathname.startsWith("/recaptcha") ||
+            hostname.includes("discord.com") && pathname.startsWith("/cdn-cgi/") ||
+            // Discord sometimes opens its own captcha flow on discord.com
+            (DISCORD_HOSTNAMES.includes(hostname) && (pathname.includes("captcha") || searchParams.has("captcha")))
+        ) {
+            return {
+                action: "allow",
+                overrideBrowserWindowOptions: {
+                    width: 500,
+                    height: 600,
+                    frame: true,
+                    autoHideMenuBar: true,
+                    webPreferences: {
+                        nodeIntegration: false,
+                        contextIsolation: true,
+                        sandbox: true,
+                    }
+                }
+            };
+        }
+
         return handleExternalUrl(url, protocol);
     });
 
     win.webContents.on("did-create-window", (childWin, { frameName, options, url }: any) => {
+        // Detect captcha windows and handle them gracefully
+        let isCaptcha = false;
+        if (url) {
+            try {
+                const { hostname, pathname } = new URL(url);
+                isCaptcha =
+                    hostname.includes("hcaptcha.com") ||
+                    hostname.includes("recaptcha.net") ||
+                    (hostname.includes("google.com") && pathname.startsWith("/recaptcha")) ||
+                    (hostname.includes("discord.com") && pathname.startsWith("/cdn-cgi/")) ||
+                    (DISCORD_HOSTNAMES.includes(hostname) && (pathname.includes("captcha")));
+            } catch {}
+        }
+
+        if (isCaptcha) {
+            childWin.setMenuBarVisibility(false);
+            // Allow the captcha window to open links externally if needed
+            childWin.webContents.setWindowOpenHandler(({ url }) => handleExternalUrl(url));
+            childWin.once("closed", () => childWin.removeAllListeners());
+            return;
+        }
+
         let isPopout = frameName.startsWith("DISCORD_");
 
         if (!isPopout) {

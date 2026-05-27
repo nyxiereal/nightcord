@@ -1,9 +1,18 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { definePluginSettings } from "@api/Settings";
-import definePlugin, { OptionType } from "@utils/types";
-import { ComponentDispatch, React, useEffect, useRef, useState, MediaEngineStore, showToast, Toasts } from "@webpack/common";
-import { getGroqKey } from "../nightcordAI/groqManager";
 import { showApiKeyWarning } from "@utils/apiKeyWarning";
+import definePlugin, { OptionType } from "@utils/types";
+import { ComponentDispatch, MediaEngineStore, React, showToast, Toasts,useEffect, useRef, useState } from "@webpack/common";
+
+import { getGroqKey } from "../nightcordAI/groqManager";
+
+// ── Settings ──────────────────────────────────────────────────────────────────
 
 const settings = definePluginSettings({
     language: {
@@ -29,6 +38,8 @@ const settings = definePluginSettings({
     },
 });
 
+// ── SVG Icon ──────────────────────────────────────────────────────────────────
+
 const DictationIcon: React.FC<{ recording?: boolean; processing?: boolean; height?: string | number; width?: string | number; className?: string; }> = ({ recording = false, processing = false, height = 20, width = 20, className }) => (
     <svg
         aria-hidden="true"
@@ -46,6 +57,8 @@ const DictationIcon: React.FC<{ recording?: boolean; processing?: boolean; heigh
         <path fill="currentColor" d="m9.2 3.86-.46-.17-.91-.34a2 2 0 0 1-1.18-1.18L6.14.79a1.21 1.21 0 0 0-2.28 0l-.5 1.38a2 2 0 0 1-1.19 1.18l-1.38.51a1.21 1.21 0 0 0 0 2.28l1.38.5a2 2 0 0 1 1.18 1.19l.51 1.38a1.21 1.21 0 0 0 2.28 0l.5-1.38a2 2 0 0 1 1.19-1.18L8 6.59l1.2-.45a1.21 1.21 0 0 0 0-2.28Z" />
     </svg>
 );
+
+// ── Transcription ─────────────────────────────────────────────────────────────
 
 function insertText(text: string) {
     ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", {
@@ -85,6 +98,8 @@ async function transcribe(blob: Blob): Promise<string> {
     return text.trim();
 }
 
+// ── Chat Bar Button ───────────────────────────────────────────────────────────
+
 const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
     const [recording, setRecording] = useState(false);
     const [processing, setProcessing] = useState(false);
@@ -93,7 +108,6 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
     const recorderRef = useRef<MediaRecorder | null>(null);
     const streamRef = useRef<MediaStream | null>(null);
     const activeRef = useRef(false);
-    const stoppingRef = useRef(false);
     const chunksRef = useRef<Blob[]>([]);
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -113,35 +127,43 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
             if (!discordId || discordId === "default") return "default";
             try {
                 const devs = MediaEngineStore.getInputDevices();
-                const selected = devs[discordId];
-                if (!selected || !selected.name) return "default";
+                let targetName = "";
                 
+                if (devs && typeof devs === "object") {
+                    if (Array.isArray(devs)) {
+                        const d = devs.find(item => item.id === discordId);
+                        if (d) targetName = d.name;
+                    } else if (devs[discordId]) {
+                        targetName = devs[discordId].name;
+                    }
+                }
+                
+                if (!targetName) return "default";
                 let webDevs = await navigator.mediaDevices.enumerateDevices();
                 if (webDevs.some(d => d.kind === "audioinput" && !d.label)) {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     stream.getTracks().forEach(t => t.stop());
                     webDevs = await navigator.mediaDevices.enumerateDevices();
                 }
-                
+
                 let match = webDevs.find(d => d.kind === "audioinput" && d.deviceId === discordId);
-                
+
                 if (!match) {
                     const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
-                    const normSelected = normalize(selected.name);
-                    
+                    const normSelected = normalize(targetName);
                     match = webDevs.find(d => {
                         if (d.kind !== "audioinput" || !d.label) return false;
                         const normLabel = normalize(d.label);
                         return normLabel.includes(normSelected) || normSelected.includes(normLabel);
                     });
                 }
-                
+
                 if (match) {
-                    console.log(`[VoiceDictation] Mapped Discord device "${selected.name}" to WebAudio deviceId "${match.deviceId}"`);
-                    showToast(`Dictation: Using mic "${match.label || selected.name}"`, Toasts.Type.SUCCESS);
+                    console.log(`[VoiceDictation] Mapped Discord device "${targetName}" to WebAudio deviceId "${match.deviceId}"`);
+                    showToast(`Dictation: Using mic "${match.label || targetName}"`, Toasts.Type.SUCCESS);
                     return match.deviceId;
                 } else {
-                    showToast(`Dictation: Could not map "${selected.name}", using default`, Toasts.Type.FAILURE);
+                    showToast(`Dictation: Could not map "${targetName}", using default`, Toasts.Type.FAILURE);
                 }
             } catch (err) {
                 console.error("[VoiceDictation] Error mapping device ID:", err);
@@ -154,7 +176,7 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
         try {
             const discordDeviceId = MediaEngineStore.getInputDeviceId();
             const realDeviceId = await getRealInputDeviceId(discordDeviceId);
-            
+
             try {
                 stream = await navigator.mediaDevices.getUserMedia({
                     audio: realDeviceId && realDeviceId !== "default"
@@ -208,8 +230,8 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
         const chunks = [...chunksRef.current];
         chunksRef.current = [];
 
-        if (chunks.length === 0 || !activeRef.current || stoppingRef.current) {
-            if (activeRef.current && !stoppingRef.current && streamRef.current) restartRecorder();
+        if (chunks.length === 0 || !activeRef.current) {
+            if (activeRef.current && streamRef.current) restartRecorder();
             return;
         }
 
@@ -219,7 +241,7 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
         console.log("[VoiceDictation] Blob size:", blob.size);
 
         if (blob.size < 500) {
-            if (activeRef.current && !stoppingRef.current) restartRecorder();
+            if (activeRef.current) restartRecorder();
             return;
         }
 
@@ -246,7 +268,7 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
             setProcessing(false);
         }
 
-        if (activeRef.current && !stoppingRef.current) restartRecorder();
+        if (activeRef.current) restartRecorder();
     }
 
     function restartRecorder() {
@@ -270,7 +292,6 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
 
     function stopDictation() {
         activeRef.current = false;
-        stoppingRef.current = false;
 
         if (timerRef.current) {
             clearInterval(timerRef.current);
@@ -291,7 +312,6 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
 
     function toggle() {
         if (recording) {
-            stoppingRef.current = true;
             if (timerRef.current) {
                 clearInterval(timerRef.current);
                 timerRef.current = null;
@@ -305,13 +325,11 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
 
     if (!isMainChat) return null;
 
-    const tooltip = errorMsg
-        ? errorMsg
-        : processing
+    const tooltip = errorMsg || (processing
             ? "Transcribing..."
             : recording
                 ? "Stop dictation"
-                : "Voice dictation";
+                : "Voice dictation");
 
     return (
         <ChatBarButton tooltip={tooltip} onClick={toggle}>
@@ -319,6 +337,8 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
         </ChatBarButton>
     );
 };
+
+// ── Plugin ────────────────────────────────────────────────────────────────────
 
 export default definePlugin({
     name: "VoiceDictation",

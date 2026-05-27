@@ -1,22 +1,7 @@
-/*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+﻿
 
 import "./styles.css";
+import "./FIGMAUI/style.css";
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
@@ -24,16 +9,15 @@ import { Card } from "@components/Card";
 import { Microphone } from "@components/Icons";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
-import { lastState as silentMessageEnabled } from "@plugins/silentMessageToggle";
+import { lastState as silentMessageEnabled } from "@nightcordplugins/silentMessageToggle";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { chooseFile } from "@utils/web";
-import { RenderModalProps } from "@vencord/discord-types";
 import { CloudUploadPlatform } from "@vencord/discord-types/enums";
-import { Button, CloudUploader, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, Modal, openModal, PendingReplyStore, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
+import { Button, CloudUploader, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, Modal, openModal, PendingReplyStore, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState, useRef } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { VoiceRecorderDesktop } from "./components/DesktopRecorder";
@@ -79,7 +63,9 @@ export const settings = definePluginSettings({
 });
 
 const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    if (!props || !props.channel) return;
     if (props.channel.guild_id && !(PermissionStore.can(PermissionsBits.SEND_VOICE_MESSAGES, props.channel) && PermissionStore.can(PermissionsBits.SEND_MESSAGES, props.channel))) return;
+    if (!Menu || !Menu.MenuItem) return;
 
     children.push(
         <Menu.MenuItem
@@ -205,7 +191,7 @@ function useObjectUrl() {
     return [url, setWithFree] as const;
 }
 
-function VoiceMessageModal({ modalProps }: { modalProps: RenderModalProps; }) {
+function VoiceMessageModal({ modalProps }: { modalProps: any; }) {
     const [isRecording, setRecording] = useState(false);
     const [blob, setBlob] = useState<Blob>();
     const [blobUrl, setBlobUrl] = useObjectUrl();
@@ -234,9 +220,44 @@ function VoiceMessageModal({ modalProps }: { modalProps: RenderModalProps; }) {
 
     const isUnsupportedFormat = blob && (!blob.type.startsWith("audio/ogg") || blob.type.includes("codecs") && !blob.type.includes("opus"));
 
+    const downloadBlob = () => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = "voice-message.ogg";
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    };
+    useEffect(() => {
+        const handler = (e: Event) => {
+            try {
+                const target = e.target as HTMLElement | null;
+                if (!target) return;
+                if (!target.closest || !document.body.querySelector) return;
+                const modalRoot = target.closest('.vc-vmsg-figma-ui') || target.closest('.vc-vmsg-figma-ui-content');
+                if (!modalRoot) return;
+                const anchor = target.closest('a[href^="blob:"]') as HTMLAnchorElement | null;
+                if (anchor) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    downloadBlob();
+                }
+            } catch (err) {
+                
+            }
+        };
+
+        document.addEventListener('click', handler, true);
+        return () => document.removeEventListener('click', handler, true);
+    }, [blob]);
+
     return (
         <Modal
             {...modalProps}
+            className={cl("modal")}
             title="Record Voice Message"
             actions={[{
                 text: "Send",
@@ -249,8 +270,10 @@ function VoiceMessageModal({ modalProps }: { modalProps: RenderModalProps; }) {
                 disabled: !blob
             }]}
         >
-            <div className={cl("buttons")}>
-                <VoiceRecorder
+            <div className={cl("figma-ui")}> 
+                <div className={cl("figma-ui-content")}>
+                    <div className={cl("buttons")}>
+                        <VoiceRecorder
                     setAudioBlob={blob => {
                         setBlob(blob);
                         setBlobUrl(blob);
@@ -275,11 +298,34 @@ function VoiceMessageModal({ modalProps }: { modalProps: RenderModalProps; }) {
             {metaError
                 ? <Paragraph className={cl("error")}>Failed to parse selected audio file: {metaError.message}</Paragraph>
                 : (
-                    <VoicePreview
-                        src={blobUrl}
-                        waveform={meta.waveform}
-                        recording={isRecording}
-                    />
+                    <>
+                        <div className={cl("preview-container")}> 
+                                    <VoicePreview
+                                        src={blobUrl}
+                                        waveform={meta.waveform}
+                                        recording={isRecording}
+                                        onDownload={downloadBlob}
+                                    />
+                                </div>
+                        {blob && (
+                            <div className={cl("send-row")}> 
+                                <Button
+                                    onClick={() => {
+                                        try {
+                                            sendAudio(blob, meta ?? EMPTY_META);
+                                            modalProps.onClose();
+                                            showToast("Now sending voice message... Please be patient", Toasts.Type.MESSAGE);
+                                        } catch (e) {
+                                            showToast("Failed to send voice message", Toasts.Type.FAILURE);
+                                        }
+                                    }}
+                                    disabled={!blob}
+                                >
+                                    Send
+                                </Button>
+                            </div>
+                        )}
+                    </>
                 )}
 
             {isUnsupportedFormat && (
@@ -291,6 +337,8 @@ function VoiceMessageModal({ modalProps }: { modalProps: RenderModalProps; }) {
                     </Forms.FormText>
                 </Card>
             )}
+                </div>
+            </div>
         </Modal>
     );
 }
