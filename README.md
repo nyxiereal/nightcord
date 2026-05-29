@@ -1,3 +1,6 @@
+# THIS IS POSSIBLE MALWARE
+# USE AT YOUR OWN RISK
+
 <div align="center">
   <img src="https://raw.githubusercontent.com/nightcordoff/nightcord/main/nightcord.ico" width="96" height="96" alt="Nightcord Logo">
 
